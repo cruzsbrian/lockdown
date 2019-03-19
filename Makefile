@@ -5,11 +5,19 @@ SRCDIR = src
 OBJDIR = obj
 BINDIR = bin
 
-COMMON_SRCS = main.c
+COMMON_SRCS = board/board.c
+OTHELLO_SRCS = main.c
+TESTBOARD_SRCS = tests/testboard.c
 
 COMMON_OBJS = $(COMMON_SRCS:.c=.o)
+OTHELLO_OBJS = $(COMMON_OBJS) $(OTHELLO_SRCS:.c=.o)
+TESTBOARD_OBJS = $(COMMON_OBJS) $(TESTBOARD_SRCS:.c=.o)
 
-othello: $(addprefix $(OBJDIR)/,$(COMMON_OBJS))
+othello: $(addprefix $(OBJDIR)/,$(OTHELLO_OBJS))
+	mkdir -p bin
+	$(CC) $^ -o $(BINDIR)/$@
+
+testboard: $(addprefix $(OBJDIR)/,$(TESTBOARD_OBJS))
 	mkdir -p bin
 	$(CC) $^ -o $(BINDIR)/$@
 
