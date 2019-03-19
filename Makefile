@@ -1,11 +1,21 @@
 CC     = gcc
 CFLAGS = -g -Wall -Wstrict-prototypes -ansi -pedantic
 
-othello: main.o
-	$(CC) main.o -o othello
+SRCDIR = src
+OBJDIR = obj
+BINDIR = bin
 
-main.o: main.c
-	$(CC) $(CFLAGS) -c main.c
+COMMON_SRCS = main.c
+
+COMMON_OBJS = $(COMMON_SRCS:.c=.o)
+
+othello: $(addprefix $(OBJDIR)/,$(COMMON_OBJS))
+	mkdir -p bin
+	$(CC) $^ -o $(BINDIR)/$@
+
+$(OBJDIR)/%.o: $(SRCDIR)/$(notdir %.c)
+	mkdir -p $(dir $@)
+	$(CC) $(CFLAGS) -c $< -o $@
 
 clean:
-	rm -f *.o othello
+	rm -f $(BINDIR)/* $(OBJDIR)/*
