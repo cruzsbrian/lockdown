@@ -12,5 +12,7 @@ int main(void) {
 
     print_board(board);
 
+    printf("%d\n", popcount_board(board));
+
     return 0;
 }
