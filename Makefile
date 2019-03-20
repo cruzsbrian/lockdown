@@ -26,4 +26,4 @@ $(OBJDIR)/%.o: $(SRCDIR)/$(notdir %.c)
 	$(CC) $(CFLAGS) -c $< -o $@
 
 clean:
-	rm -f $(BINDIR)/* $(OBJDIR)/*
+	rm -rf $(BINDIR)/* $(OBJDIR)/*
