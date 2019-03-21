@@ -38,6 +38,134 @@ int popcount_board(board_t *board) {
 
 
 
+/* Masks to filter out end files. */
+const uint64_t notAFile = 0xfefefefefefefefe;
+const uint64_t notHFile = 0x7f7f7f7f7f7f7f7f;
+
+uint64_t soutOccl(uint64_t gen, uint64_t pro) {
+    gen |= pro & (gen >> 8);
+    pro &=       (pro >> 8);
+    gen |= pro & (gen >> 16);
+    pro &=       (pro >> 16);
+    gen |= pro & (gen >> 32);
+    return gen;
+}
+
+uint64_t nortOccl(uint64_t gen, uint64_t pro) {
+    gen |= pro & (gen << 8);
+    pro &=       (pro << 8);
+    gen |= pro & (gen << 16);
+    pro &=       (pro << 16);
+    gen |= pro & (gen << 32);
+    return gen;
+}
+
+uint64_t eastOccl(uint64_t gen, uint64_t pro) {
+    pro &= notAFile;
+    gen |= pro & (gen << 1);
+    pro &=       (pro << 1);
+    gen |= pro & (gen << 2);
+    pro &=       (pro << 2);
+    gen |= pro & (gen << 4);
+    return gen;
+}
+
+uint64_t westOccl(uint64_t gen, uint64_t pro) {
+    pro &= notHFile;
+    gen |= pro & (gen >> 1);
+    pro &=       (pro >> 1);
+    gen |= pro & (gen >> 2);
+    pro &=       (pro >> 2);
+    gen |= pro & (gen >> 4);
+    return gen;
+}
+
+uint64_t noEaOccl(uint64_t gen, uint64_t pro) {
+    pro &= notAFile;
+    gen |= pro & (gen << 9);
+    pro &=       (pro << 9);
+    gen |= pro & (gen << 18);
+    pro &=       (pro << 18);
+    gen |= pro & (gen << 36);
+    return gen;
+}
+
+uint64_t soEaOccl(uint64_t gen, uint64_t pro) {
+    pro &= notAFile;
+    gen |= pro & (gen >> 7);
+    pro &=       (pro >> 7);
+    gen |= pro & (gen >> 14);
+    pro &=       (pro >> 14);
+    gen |= pro & (gen >> 28);
+    return gen;
+}
+
+uint64_t noWeOccl(uint64_t gen, uint64_t pro) {
+    pro &= notHFile;
+    gen |= pro & (gen << 7);
+    pro &=       (pro << 7);
+    gen |= pro & (gen << 14);
+    pro &=       (pro << 14);
+    gen |= pro & (gen << 28);
+    return gen;
+}
+
+uint64_t soWeOccl(uint64_t gen, uint64_t pro) {
+    pro &= notHFile;
+    gen |= pro & (gen >> 9);
+    pro &=       (pro >> 9);
+    gen |= pro & (gen >> 18);
+    pro &=       (pro >> 18);
+    gen |= pro & (gen >> 36);
+    return gen;
+}
+
+
+uint64_t moves(board_t *board, int c) {
+    uint64_t gen, pro, empty, tmp, moves;
+
+    if (c == BLACK) {
+        gen = board->b;
+        pro = board->w;
+    } else {
+        gen = board->w;
+        pro = board->b;
+    }
+
+    moves = 0L;
+    empty = ~(gen | pro);
+
+    tmp = soutOccl(gen, pro) & pro;
+    moves |= (tmp >> 8) & empty;
+
+    tmp = nortOccl(gen, pro) & pro;
+    moves |= (tmp << 8) & empty;
+
+    tmp = eastOccl(gen, pro) & pro;
+    moves |= (tmp << 1) & notAFile & empty;
+
+    tmp = westOccl(gen, pro) & pro;
+    moves |= (tmp >> 1) & notHFile & empty;
+
+    tmp = noEaOccl(gen, pro) & pro;
+    moves |= (tmp << 9) & notAFile & empty;
+
+    tmp = soEaOccl(gen, pro) & pro;
+    moves |= (tmp >> 7) & notAFile & empty;
+
+    tmp = noWeOccl(gen, pro) & pro;
+    moves |= (tmp << 7) & notHFile & empty;
+
+    tmp = soWeOccl(gen, pro) & pro;
+    moves |= (tmp >> 9) & notHFile & empty;
+
+
+    return moves;
+}
+
+
+
+
 void add_piece(board_t *board, int pos, int color) {
     if (color == BLACK) {
         board->b |= (1L << pos);
@@ -68,5 +196,15 @@ void print_board(board_t *board) {
             }
         }
         printf("\n");
+    }
+}
+
+void print_bits(uint64_t x) {
+    int ii;
+    for (ii = 0; ii < 64; ++ii) {
+        printf("%ld ", (x >> ii) & 1L);
+        if (ii % 8 == 7) {
+            printf("\n");
+        }
     }
 }

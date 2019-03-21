@@ -10,10 +10,13 @@ int main(void) {
     add_piece(board, 28, BLACK);
     add_piece(board, 35, BLACK);
     add_piece(board, 36, WHITE);
+    add_piece(board, 45, BLACK);
 
     print_board(board);
 
     printf("%d\n", popcount_board(board));
+
+    print_bits(moves(board, BLACK));
 
     free(board);
 
