@@ -159,15 +159,43 @@ uint64_t moves(board_t *board, int c) {
     tmp = soWeOccl(gen, pro) & pro;
     moves |= (tmp >> 9) & notHFile & empty;
 
-
     return moves;
 }
 
 
 
 
-void add_piece(board_t *board, int pos, int color) {
-    if (color == BLACK) {
+void do_move(board_t *board, uint64_t gen, int c) {
+    uint64_t own, pro, diff;
+
+    if (c == BLACK) {
+        own = board->b;
+        pro = board->w;
+
+        board->b |= gen;
+    } else {
+        own = board->w;
+        pro = board->b;
+
+        board->w |= gen;
+    }
+    
+    diff = 0L;
+    diff |= soutOccl(gen, pro) & nortOccl(own, pro);
+    diff |= nortOccl(gen, pro) & soutOccl(own, pro);
+    diff |= eastOccl(gen, pro) & westOccl(own, pro);
+    diff |= westOccl(gen, pro) & eastOccl(own, pro);
+    diff |= noEaOccl(gen, pro) & soWeOccl(own, pro);
+    diff |= soEaOccl(gen, pro) & noWeOccl(own, pro);
+    diff |= noWeOccl(gen, pro) & soEaOccl(own, pro);
+    diff |= soWeOccl(gen, pro) & noEaOccl(own, pro);
+
+    board->b ^= diff;
+    board->w ^= diff;
+}
+
+void add_piece(board_t *board, int pos, int c) {
+    if (c == BLACK) {
         board->b |= (1L << pos);
     } else {
         board->w |= (1L << pos);
@@ -197,6 +225,7 @@ void print_board(board_t *board) {
         }
         printf("\n");
     }
+    printf("\n");
 }
 
 void print_bits(uint64_t x) {
@@ -207,4 +236,5 @@ void print_bits(uint64_t x) {
             printf("\n");
         }
     }
+    printf("\n");
 }
