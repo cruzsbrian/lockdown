@@ -5,6 +5,7 @@
 
 #include "../board/board.h"
 
+/* Struct so that negamax can return both a move and its score. */
 typedef struct {
     int pos;
     float score;
