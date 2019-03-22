@@ -4,7 +4,7 @@
 #include "../search/negamax.h"
 
 int main(void) {
-    move_score_t next_move;
+    int next_move;
 
     board_t *board = create_board();
     board->b = 0L;
@@ -17,17 +17,21 @@ int main(void) {
 
     print_board(board);
 
-    next_move = negamax(board, BLACK, 10);
-    printf("%d\n", next_move.pos);
+    while (1) {
+        next_move = negamax(board, BLACK, 8).pos;
+        printf("%d\n", next_move);
 
-    do_move(board, 1L << next_move.pos, BLACK);
-    print_board(board);
+        do_move(board, 1L << next_move, BLACK);
+        print_board(board);
 
-    next_move = negamax(board, WHITE, 10);
-    printf("%d\n", next_move.pos);
+        printf("White move: ");
+        if (!scanf("%d", &next_move)) {
+            break;
+        }
 
-    do_move(board, 1L << next_move.pos, WHITE);
-    print_board(board);
+        do_move(board, 1L << next_move, WHITE);
+        print_board(board);
+    }
 
     return 0;
 }

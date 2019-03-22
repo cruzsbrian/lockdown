@@ -39,7 +39,7 @@ move_score_t negamax(board_t *board, int c, int depth) {
 
     while (moves) {
         /* Get index of least significant bit. */
-        move = __builtin_ctz(moves);
+        move = __builtin_ctzll(moves);
 
         /* Zero out least significant bit. */
         moves &= moves - 1;
