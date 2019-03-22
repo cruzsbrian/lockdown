@@ -2,6 +2,7 @@
 #include <stdlib.h>
 
 #include "../board/board.h"
+#include "../eval/simple_eval.h"
 
 int main(void) {
     board_t *board = create_board();
@@ -15,15 +16,19 @@ int main(void) {
 
     print_board(board);
 
+    printf("%f\n", simple_eval(board, BLACK));
+
     do_move(board, 1L << 44, BLACK);
     print_board(board);
+
+    printf("%f\n", simple_eval(board, BLACK));
 
     do_move(board, 1L << 45, WHITE);
     print_board(board);
 
-    print_bits(moves(board, BLACK));
+    printf("%f\n", simple_eval(board, BLACK));
 
-    printf("%d\n", popcount_board(board));
+    print_bits(moves(board, BLACK));
 
     free(board);
 
