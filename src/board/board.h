@@ -33,7 +33,7 @@ uint64_t soEaOccl(uint64_t gen, uint64_t pro);
 uint64_t noWeOccl(uint64_t gen, uint64_t pro);
 uint64_t soWeOccl(uint64_t gen, uint64_t pro);
 
-uint64_t moves(board_t *board, int c);
+uint64_t get_moves(board_t *board, int c);
 
 void do_move(board_t *board, uint64_t gen, int c);
 

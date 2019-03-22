@@ -163,7 +163,7 @@ uint64_t soWeOccl(uint64_t gen, uint64_t pro) {
  *
  * Returns a long representing squares that can be played in.
  */
-uint64_t moves(board_t *board, int c) {
+uint64_t get_moves(board_t *board, int c) {
     uint64_t gen, pro, empty, tmp, moves;
 
     if (c == BLACK) {

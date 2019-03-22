@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <x86intrin.h>
 
 #include "../board/board.h"
 #include "../eval/simple_eval.h"
@@ -31,6 +32,9 @@ int main(void) {
     print_bits(moves(board, BLACK));
 
     free(board);
+
+
+    printf("%d\n", _pext_u32(0xffffffff, 0x00000005));
 
     return 0;
 }
