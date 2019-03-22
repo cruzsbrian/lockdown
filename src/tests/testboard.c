@@ -5,6 +5,8 @@
 
 int main(void) {
     board_t *board = create_board();
+    board->b = 0L;
+    board->w = 0L;
 
     add_piece(board, 27, WHITE);
     add_piece(board, 28, BLACK);
@@ -18,6 +20,10 @@ int main(void) {
 
     do_move(board, 1L << 45, WHITE);
     print_board(board);
+
+    print_bits(moves(board, BLACK));
+
+    printf("%d\n", popcount_board(board));
 
     free(board);
 

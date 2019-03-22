@@ -4,9 +4,14 @@
 #include "board.h"
 
 
+/**
+ * ========================================
+ *              Board Creation
+ * ========================================
+ */
+
 board_t *create_board(void) {
-    /* Use calloc to zero out memory */
-    board_t *new_board = (board_t *)calloc(1, sizeof(board_t));
+    board_t *new_board = (board_t *)malloc(sizeof(board_t));
     
     if (new_board == NULL) {
         fprintf(stderr, "Error: Unable to allocate new board.");
@@ -16,8 +21,21 @@ board_t *create_board(void) {
     return new_board;
 }
 
+board_t *copy_board(board_t *old) {
+    board_t *new_board = create_board();
+    new_board->b = old->b;
+    new_board->w = old->w;
+    return new_board;
+}
 
 
+
+
+/**
+ * ========================================
+ *            Population Count
+ * ========================================
+ */
 
 int popcount(uint64_t x) {
     const uint64_t m1  = 0x5555555555555555;
@@ -38,10 +56,25 @@ int popcount_board(board_t *board) {
 
 
 
+/**
+ * ========================================
+ *       Move Generation and Make-Move
+ * ========================================
+ */
+
 /* Masks to filter out end files. */
 const uint64_t notAFile = 0xfefefefefefefefe;
 const uint64_t notHFile = 0x7f7f7f7f7f7f7f7f;
 
+/*
+ * Fill algorithms:
+ * Smears the gen bitmap in the specified direction as long as there is
+ * something in the pro bitmap. For east, west, and diagonals, we exclude the 
+ * first file in that shift direction to avoid wrap-around.
+ *
+ * The result takes each piece in gen, and draws a ray from it in the specified
+ * direction as far as pieces in pro go in that direction.
+ */
 uint64_t soutOccl(uint64_t gen, uint64_t pro) {
     gen |= pro & (gen >> 8);
     pro &=       (pro >> 8);
@@ -121,6 +154,15 @@ uint64_t soWeOccl(uint64_t gen, uint64_t pro) {
 }
 
 
+/*
+ * Move generation:
+ * Use own pieces as generator, opponents pieces as propogator. After rays have
+ * been calculated, they must be &-ed with pro to exclude the generator piece.
+ * Then shift one more step in the ray direction (making sure not to wrap
+ * around), and & with empty squares to get playable squares.
+ *
+ * Returns a long representing squares that can be played in.
+ */
 uint64_t moves(board_t *board, int c) {
     uint64_t gen, pro, empty, tmp, moves;
 
@@ -165,6 +207,13 @@ uint64_t moves(board_t *board, int c) {
 
 
 
+/*
+ * Make-move:
+ * Gen is a single-bit long representing the added piece. Filling from gen along
+ * opponent pieces and &-ing with rays in the opposite direction from existing
+ * pieces gives only lines of opponent pieces that have the new piece on one
+ * side and an existing own piece on the other side.
+ */
 void do_move(board_t *board, uint64_t gen, int c) {
     uint64_t own, pro, diff;
 
@@ -231,7 +280,7 @@ void print_board(board_t *board) {
 void print_bits(uint64_t x) {
     int ii;
     for (ii = 0; ii < 64; ++ii) {
-        printf("%ld ", (x >> ii) & 1L);
+        printf((x >> ii) & 1L ? "1 " : "_ ");
         if (ii % 8 == 7) {
             printf("\n");
         }
