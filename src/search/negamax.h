@@ -12,5 +12,6 @@ typedef struct {
 } move_score_t;
 
 move_score_t negamax(board_t *board, int c, int depth);
+move_score_t endgame(board_t *board, int c);
 
 #endif

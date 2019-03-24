@@ -3,9 +3,15 @@
 #include "../board/board.h"
 
 float simple_eval(board_t *b, int c) {
+    int material, mobility;
+
     if (c == BLACK) {
-        return (float)(popcount(b->b) - popcount(b->w));
+        material =  popcount(b->b) - popcount(b->w);
     } else {
-        return (float)(popcount(b->w) - popcount(b->b));
+        material =  popcount(b->w) - popcount(b->b);
     }
+
+    mobility = popcount(get_moves(b, c));
+
+    return (float)(material + mobility);
 }

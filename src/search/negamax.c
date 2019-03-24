@@ -1,10 +1,11 @@
 #include "negamax.h"
 
+#include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
 #include <float.h>
 #include "../board/board.h"
-#include "../eval/simple_eval.h"
+#include "../eval/table_eval.h"
 
 
 /**
@@ -21,25 +22,37 @@ move_score_t negamax(board_t *board, int c, int depth) {
     /* If depth reached, evaluate and return. */
     if (depth == 0) {
         result.pos = -1;
-        result.score = simple_eval(board, c);
+        result.score = table_eval(board, c);
+        /*printf("DEPTH 0. Score %2.f for color %d \n\n", result.score, c);*/
         return result;
     }
 
     moves = get_moves(board, c);
 
     /* If game over (neither player can move), evaluate and return. */
-    if (moves == 0 && get_moves(board, !c) == 0) {
+    if (moves == 0L && get_moves(board, !c) == 0L) {
         result.pos = -1;
-        result.score = simple_eval(board, c);
+        result.score = table_eval(board, c);
+
+        /*printf("Game over. Score %2.f for color %d \n\n", result.score, c);*/
+
         return result;
     }
 
-    max_score = FLT_MIN;
+    max_score = -FLT_MAX;
     best_move = -1;
+
+    /* In the case that there are no possible moves, pass and proceed down. */
+    if (moves == 0L) {
+        max_score = -negamax(board, !c, depth - 1).score;
+    }
 
     while (moves) {
         /* Get index of least significant bit. */
         move = __builtin_ctzll(moves);
+
+        /*printf("Depth: %d\n", depth);*/
+        /*printf("Testing move %d for color %d\n", move, c);*/
 
         /* Zero out least significant bit. */
         moves &= moves - 1;
@@ -51,6 +64,11 @@ move_score_t negamax(board_t *board, int c, int depth) {
         /* Make move and get its score. */
         do_move(board, 1L << move, c);
         score = -negamax(board, !c, depth - 1).score;
+
+        /*if (depth == 3) {*/
+            /*printf("==> MOVE %d minimax: %2.f\n", move, score);*/
+            /*printf("    max_score: %2.f\n\n", max_score);*/
+        /*}*/
 
         /* Undo move. */
         board->b = old_b;
@@ -66,4 +84,4 @@ move_score_t negamax(board_t *board, int c, int depth) {
     result.score = -max_score;
 
     return result;
-}
+}  

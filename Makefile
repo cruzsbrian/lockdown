@@ -5,7 +5,7 @@ SRCDIR = src
 OBJDIR = obj
 BINDIR = bin
 
-COMMON_SRCS = board/board.c eval/simple_eval.c search/negamax.c
+COMMON_SRCS = board/board.c eval/table_eval.c search/negamax.c
 OTHELLO_SRCS = main.c
 TESTBOARD_SRCS = tests/testboard.c
 TESTSEARCH_SRCS = tests/testnegamax.c
