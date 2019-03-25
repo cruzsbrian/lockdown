@@ -23,10 +23,6 @@ move_score_t negamax(board_t *board, int c, int depth) {
     if (depth == 0) {
         result.pos = -1;
         result.score = table_eval(board, c);
-        /*if (result.score > 1000000 || result.score < -1000000) {*/
-            /*printf("DEPTH 0. Score %2.f for color %d \n\n", result.score, c);*/
-            /*print_board(board);*/
-        /*}*/
         return result;
     }
 
@@ -36,9 +32,6 @@ move_score_t negamax(board_t *board, int c, int depth) {
     if (moves == 0L && get_moves(board, !c) == 0L) {
         result.pos = -1;
         result.score = table_eval(board, c);
-
-        /*printf("Game over. Score %2.f for color %d \n\n", result.score, c);*/
-
         return result;
     }
 
@@ -54,11 +47,6 @@ move_score_t negamax(board_t *board, int c, int depth) {
         /* Get index of least significant bit. */
         move = __builtin_ctzll(moves);
 
-        /*if (depth >= 6) {*/
-            /*printf("Depth: %d\n", depth);*/
-            /*printf("Testing move %d for color %d\n", move, c);*/
-        /*}*/
-
         /* Zero out least significant bit. */
         moves &= moves - 1;
 
@@ -69,9 +57,6 @@ move_score_t negamax(board_t *board, int c, int depth) {
         /* Make move and get its score. */
         do_move(board, move, c);
         score = -negamax(board, !c, depth - 1).score;
-
-        /*printf("Depth: %d\n", depth);*/
-        /*printf("==> MOVE %d for color %d minimax: %2.f\n", move, c, score);*/
 
         /* Undo move. */
         board->b = old_b;
