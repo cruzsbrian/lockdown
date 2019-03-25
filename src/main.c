@@ -20,14 +20,24 @@ int main(int argc, char *argv[]) {
         exit(1);
     }
 
-    bot_color = strcmp(argv[1], "0");
+    if (strcmp(argv[1],"0") == 0 || strcmp(argv[1],"black") == 0) {
+        bot_color = BLACK;
+    }
+    else if (strcmp(argv[1],"1") == 0 || strcmp(argv[1],"white") == 0 ) {
+        bot_color = WHITE;
+    }
+    else {
+        fprintf(stderr, "Invalid bot color argument.\n");
+        exit(1);
+    }
+
     printf("Bot color: %s\n", bot_color ? "white" : "black");
 
 
     board = create_board();
     board->b = 0L;
     board->w = 0L;
-    
+
     add_piece(board, 27, WHITE);
     add_piece(board, 28, BLACK);
     add_piece(board, 35, BLACK);
@@ -41,8 +51,13 @@ int main(int argc, char *argv[]) {
 
     while (get_moves(board, BLACK) || get_moves(board, WHITE)) {
         if (turn == bot_color) {
+            int movecol;
+            char moverow;
             move = get_bot_move(board, turn, move_num);
-            printf("Bot move: %d\n", move);
+            movecol = (move + 1) % 8;
+            if (movecol == 0) movecol += 8;
+            moverow = 97 + (move - movecol + 1) / 8;
+            printf("Bot move: %c%d (%d)\n", moverow, movecol, move);
         } else {
             move = get_human_move(board, turn);
         }
@@ -80,17 +95,27 @@ int get_bot_move(board_t *board, int c, int move_num) {
 
 int get_human_move(board_t *board, int c) {
     int move;
+    char moverow;
+
+    uint64_t legal_moves = get_moves(board, c);
 
     printf("Your move: ");
-    if (!get_moves(board, c)) {
+    if (!legal_moves) {
         printf("pass\n");
         return -1;
     }
 
+    scanf("%c", &moverow);
     scanf("%d", &move);
-    while (!((1L << move) & get_moves(board, c))) {
-        printf("Illegal move\nYour move: ");
-        scanf("%d", &move);
+    printf("%c, %d\n", &moverow, &move);
+
+    move--;
+    move += 8 * (moverow-97);
+
+
+    if (!((1L << move) & legal_moves)) {
+        printf("Illegal move \"%d\"\nYour move: ", &move);
+        return get_human_move(board, c);
     }
 
     return move;
