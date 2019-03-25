@@ -31,6 +31,17 @@ board_t *copy_board(board_t *old) {
 
 
 
+/*
+ * Modeled after strcmp, returns 0 if boards are the same.
+ * TODO: make it return 0 for rotated/reflected boards as well.
+ */
+int board_compare(board_t *b1, board_t *b2) {
+    return !(b1->b == b2->b && b1->w == b2->w);
+}
+
+
+
+
 /**
  * ========================================
  *            Population Count

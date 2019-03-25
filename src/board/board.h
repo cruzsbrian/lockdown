@@ -18,6 +18,9 @@ board_t *create_board(void);
 board_t *copy_board(board_t *old);
 
 
+int board_compare(board_t *b1, board_t *b2);
+
+
 /* Population count */
 int popcount(uint64_t x);
 int popcount_board(board_t *board);

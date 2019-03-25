@@ -56,7 +56,7 @@ int main(int argc, char *argv[]) {
             move = get_bot_move(board, turn, move_num);
             movecol = (move + 1) % 8;
             if (movecol == 0) movecol += 8;
-            moverow = 97 + (move - movecol + 1) / 8;
+            moverow = 'a' + (move - movecol + 1) / 8;
             printf("Bot move: %c%d (%d)\n", moverow, movecol, move);
         } else {
             move = get_human_move(board, turn);
@@ -105,16 +105,16 @@ int get_human_move(board_t *board, int c) {
         return -1;
     }
 
-    scanf("%c", &moverow);
-    scanf("%d", &move);
-    printf("%c, %d\n", &moverow, &move);
+    /* Include a space so that the \n from the last one doesn't get counted. */
+    scanf(" %c%d", &moverow, &move);
+    /*printf("%c, %d\n", moverow, move);*/
 
     move--;
-    move += 8 * (moverow-97);
+    move += 8 * (moverow - 'a');
 
 
     if (!((1L << move) & legal_moves)) {
-        printf("Illegal move \"%d\"\nYour move: ", &move);
+        printf("Illegal move \"%d\"\n", move);
         return get_human_move(board, c);
     }
 
