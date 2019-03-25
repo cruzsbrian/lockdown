@@ -8,9 +8,9 @@ const uint64_t m_edge   = 0x7e8181818181817e;
 const uint64_t m_other  = 0x007e7e7e7e7e7e00;
 
 float table_eval(board_t *b, int c) {
-    const float corner        = 11.;
+    const float corner        = 20.;
     const float edge          = 6.;
-    const float other         = 2.;
+    const float other         = 1.;
     const float mobility      = 4.;
 
     float score = 0.;

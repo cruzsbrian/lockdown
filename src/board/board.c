@@ -209,13 +209,21 @@ uint64_t get_moves(board_t *board, int c) {
 
 /*
  * Make-move:
+ * Makes a move for color c in position pos. Give -1 as pos for pass.
  * Gen is a single-bit long representing the added piece. Filling from gen along
  * opponent pieces and &-ing with rays in the opposite direction from existing
  * pieces gives only lines of opponent pieces that have the new piece on one
  * side and an existing own piece on the other side.
  */
-void do_move(board_t *board, uint64_t gen, int c) {
-    uint64_t own, pro, diff;
+void do_move(board_t *board, int pos, int c) {
+    uint64_t gen, own, pro, diff;
+
+    /* -1 for pass. */
+    if (pos == -1) {
+        return;
+    }
+
+    gen = 1L << pos;
 
     if (c == BLACK) {
         own = board->b;
