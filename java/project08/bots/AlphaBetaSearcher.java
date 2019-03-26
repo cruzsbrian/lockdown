@@ -1,10 +1,3 @@
-package project08.bots;
-
-import edu.caltech.cs2.project08.bots.AbstractSearcher;
-import edu.caltech.cs2.project08.bots.BestMove;
-import edu.caltech.cs2.project08.game.Board;
-import edu.caltech.cs2.project08.game.Evaluator;
-import edu.caltech.cs2.project08.game.Move;
 import edu.caltech.cs2.project08.interfaces.IDeque;
 
 public class AlphaBetaSearcher<B extends Board> extends AbstractSearcher<B> {
