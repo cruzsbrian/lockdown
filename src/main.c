@@ -9,11 +9,12 @@
 #include "eval/table_eval.h"
 
 int get_human_move(board_t *board, int c);
-int get_bot_move(board_t *board, int c, int move_num);
+move_score_t get_bot_move(board_t *board, int c, int move_num);
 
 int main(int argc, char *argv[]) {
     board_t *board;
     int turn, bot_color, move, move_num;
+    move_score_t bot_move;
 
     /* Get bot color from args. */
     if (argc != 2) {
@@ -54,11 +55,17 @@ int main(int argc, char *argv[]) {
         if (turn == bot_color) {
             int movecol;
             char moverow;
-            move = get_bot_move(board, turn, move_num);
+            bot_move = get_bot_move(board, turn, move_num);
+            move = bot_move.pos;
             movecol = (move + 1) % 8;
             if (movecol == 0) movecol += 8;
             moverow = 'a' + (move - movecol + 1) / 8;
+
             printf("Bot move: %c%d (%d)\n", moverow, movecol, move);
+            printf("Score: %.2f\n", bot_move.score);
+            if (bot_move.end && bot_move.score > 0) {
+                printf("Guaranteed win.\n");
+            }
         } else {
             move = get_human_move(board, turn);
         }
@@ -86,11 +93,11 @@ int main(int argc, char *argv[]) {
 }
 
 
-int get_bot_move(board_t *board, int c, int move_num) {
-    if (move_num > 60 - 16) {
-        return alphabeta(board, c, -FLT_MAX, FLT_MAX, 20).pos;
+move_score_t get_bot_move(board_t *board, int c, int move_num) {
+    if (move_num > 60 - 22) {
+        return alphabeta(board, c, -FLT_MAX, FLT_MAX, 24);
     } else {
-        return alphabeta(board, c, -FLT_MAX, FLT_MAX, 10).pos;
+        return alphabeta(board, c, -FLT_MAX, FLT_MAX, 10);
     }
 }
 
@@ -100,7 +107,7 @@ int get_human_move(board_t *board, int c) {
 
     uint64_t legal_moves = get_moves(board, c);
 
-    printf("Your move: ");
+    printf("Opponent move: ");
     if (!legal_moves) {
         printf("pass\n");
         return -1;

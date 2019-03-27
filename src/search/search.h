@@ -5,9 +5,10 @@
 
 /* Struct so that searches can return both a move and its score. */
 typedef struct {
-    int pos;
-    float score;
-    board_t *board;
+    int pos; /* squared piece was placed */
+    float score; /* minimax score */
+    int end; /* if leads to endgame */
+    /*board_t after;*/
 } move_score_t;
 
 #endif
