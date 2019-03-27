@@ -90,7 +90,7 @@ int get_bot_move(board_t *board, int c, int move_num) {
     if (move_num > 60 - 16) {
         return alphabeta(board, c, -FLT_MAX, FLT_MAX, 20).pos;
     } else {
-        return alphabeta(board, c, -FLT_MAX, FLT_MAX, 8).pos;
+        return alphabeta(board, c, -FLT_MAX, FLT_MAX, 10).pos;
     }
 }
 

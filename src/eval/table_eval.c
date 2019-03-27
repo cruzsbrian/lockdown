@@ -24,15 +24,11 @@ float table_eval(board_t *b, int c) {
         opp = b->b;
     }
 
-    if (popcount_board(b) < 50) {
-        score += (float)(popcount(m_corner & own) - popcount(m_corner & opp)) * corner;
-        score += (float)(popcount(m_edge & own) - popcount(m_edge & opp)) * edge;
-        score += (float)(popcount(m_other & own) - popcount(m_other & opp)) * other;
+    score += (float)(popcount(m_corner & own) - popcount(m_corner & opp)) * corner;
+    score += (float)(popcount(m_edge & own) - popcount(m_edge & opp)) * edge;
+    score += (float)(popcount(m_other & own) - popcount(m_other & opp)) * other;
 
-        score += (float)(popcount(get_moves(b, BLACK)) - popcount(get_moves(b, WHITE))) * mobility;
-    } else {
-        score = (float)endgame_eval(b, c);
-    }
+    score += (float)(popcount(get_moves(b, BLACK)) - popcount(get_moves(b, WHITE))) * mobility;
 
     return score;
 }
