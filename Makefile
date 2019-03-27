@@ -1,5 +1,6 @@
 CC     = gcc
-CFLAGS = -g -mbmi2 -Wall -Wstrict-prototypes -ansi -pedantic
+CFLAGS = -mbmi2 -Wall -Wstrict-prototypes -ansi -pedantic -Ofast
+LDFLAGS = -Ofast
 
 SRCDIR = src
 OBJDIR = obj
@@ -8,11 +9,11 @@ BINDIR = bin
 BOARD_SRCS = board.c
 EVAL_SRCS = simple_eval.c table_eval.c
 SEARCH_SRCS = alphabeta.c
-UTIL_SRCS = hash_table.c
+ANAL_SRCS = hash_table.c
 COMMON_SRCS = $(addprefix board/,$(BOARD_SRCS)) \
 			  $(addprefix eval/,$(EVAL_SRCS)) \
 			  $(addprefix search,/$(SEARCH_SRCS)) \
-			  $(addprefix util,/$(UTIL_SRCS))
+			  $(addprefix analysis,/$(ANAL_SRCS))
 
 OTHELLO_SRCS = main.c
 TESTBOARD_SRCS = tests/testboard.c
@@ -25,7 +26,7 @@ TESTSEARCH_OBJS = $(COMMON_OBJS) $(TESTSEARCH_SRCS:.c=.o)
 
 othello: $(addprefix $(OBJDIR)/,$(OTHELLO_OBJS))
 	mkdir -p bin
-	$(CC) $^ -o $(BINDIR)/$@
+	$(CC) $^ $(LDFLAGS) -o $(BINDIR)/$@
 
 testboard: $(addprefix $(OBJDIR)/,$(TESTBOARD_OBJS))
 	mkdir -p bin

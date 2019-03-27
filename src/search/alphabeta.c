@@ -1,7 +1,9 @@
 #include "alphabeta.h"
 
 #include <stdlib.h>
+#include <stdio.h>
 #include <stdint.h>
+#include <stddef.h>
 #include <float.h>
 #include "../board/board.h"
 #include "../eval/table_eval.h"
@@ -25,7 +27,7 @@ move_score_t alphabeta(board_t *board, int c, float alpha, float beta, int depth
 
     /* If game over, evaluate and return. */
     if (moves == 0L && get_moves(board, !c) == 0L) {
-        best_move.score = table_eval(board, c);
+        best_move.score = endgame_eval(board, c);
         return best_move;
     }
 
@@ -76,4 +78,53 @@ move_score_t alphabeta(board_t *board, int c, float alpha, float beta, int depth
 
     best_move.score = alpha;
     return best_move;
+}
+
+
+
+
+/**
+ * Gets all the moves available to color c for board b, puts them in an array,
+ * and sorts them. The resulting array is at *move_arr. The number of moves is
+ * put into *n. *move_arr must be freed later. Moves are scored according to the
+ * evaluation of the board immediately after they are made.
+ */
+void get_scored_moves(move_score_t **move_arr, size_t *n, board_t *board, int c) {
+    int move;
+    uint64_t old_b, old_w;
+    uint64_t moves_mask = get_moves(board, c);
+
+    *move_arr = malloc(24 * sizeof(move_score_t));
+    if (*move_arr == NULL) {
+        fprintf(stderr, "Error: unable to allocate memory for move array.");
+        exit(1);
+    }
+
+    *n = 0;
+    while (moves_mask) {
+        move = __builtin_ctzll(moves_mask);
+        moves_mask &= moves_mask - 1;
+
+        (*move_arr)[*n].pos = move;
+
+        old_b = board->b;
+        old_w = board->w;
+
+        do_move(board, move, c);
+        (*move_arr)[*n].score = table_eval(board, c);
+
+        board->b = old_b;
+        board->w = old_w;
+
+        (*n)++;
+    }
+
+    qsort(*move_arr, *n, sizeof(move_score_t), compare_moves);
+}
+
+
+int compare_moves(const void *m1, const void *m2) {
+    float s1 = ((move_score_t *)m1)->score;
+    float s2 = ((move_score_t *)m2)->score;
+    return s2 - s1;
 }
