@@ -7,7 +7,7 @@ BINDIR = bin
 
 BOARD_SRCS = board.c
 EVAL_SRCS = simple_eval.c table_eval.c
-SEARCH_SRCS = negamax.c
+SEARCH_SRCS = alphabeta.c
 UTIL_SRCS = hash_table.c
 COMMON_SRCS = $(addprefix board/,$(BOARD_SRCS)) \
 			  $(addprefix eval/,$(EVAL_SRCS)) \

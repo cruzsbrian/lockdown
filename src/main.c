@@ -1,10 +1,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <float.h>
 
 #include "board/board.h"
 #include "search/search.h"
-#include "search/negamax.h"
+#include "search/alphabeta.h"
 #include "eval/table_eval.h"
 
 int get_human_move(board_t *board, int c);
@@ -86,10 +87,10 @@ int main(int argc, char *argv[]) {
 
 
 int get_bot_move(board_t *board, int c, int move_num) {
-    if (move_num > 60 - 12) {
-        return negamax(board, c, 13).pos;
+    if (move_num > 60 - 16) {
+        return alphabeta(board, c, -FLT_MAX, FLT_MAX, 20).pos;
     } else {
-        return negamax(board, c, 7).pos;
+        return alphabeta(board, c, -FLT_MAX, FLT_MAX, 8).pos;
     }
 }
 
