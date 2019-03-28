@@ -39,7 +39,7 @@ move_score_t ab_search(board_t *board, int c, int depth, long *n) {
 
         old = *board;
         do_move(board, move.pos, c);
-        result = alphabeta(board, !c, -FLT_MAX, -FLT_MIN, depth, n);
+        result = alphabeta(board, !c, -FLT_MAX, -best_move.score, depth, n);
         *board = old;
 
         score = -result.score;
