@@ -43,7 +43,7 @@ float table_eval(board_t *b, int c) {
     opp_moves = get_moves(b, !c);
 
     score += piece_score(own) - piece_score(opp);
-    score += (float)(popcount(own_moves) - popcount(opp_moves)) * w_mobility;
+    score += (piece_score(own_moves) - piece_score(opp_moves)) * w_mobility;
 
     return score;
 }

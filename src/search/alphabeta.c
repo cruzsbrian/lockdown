@@ -68,16 +68,6 @@ move_score_t alphabeta(board_t *board, int c, float alpha, float beta, int depth
         board->w = old_w;
 
         /*
-         *[> If move leads to a guaranteed win, return it. <]
-         *if (result.end && score > 0) {
-         *    best_move.pos = move;
-         *    best_move.score = score;
-         *    best_move.end = result.end;
-         *    return best_move;
-         *}
-         */
-
-        /*
          * If score is above beta, opponent won't allow this board state to be
          * reached, so we can stop searching it.
          */
