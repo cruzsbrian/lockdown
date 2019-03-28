@@ -64,9 +64,6 @@ int main(int argc, char *argv[]) {
 
             printf("\nBot move: %c%d (score %.2f)\n",
                     moverow, movecol, bot_move.score);
-            if (bot_move.end && bot_move.score > 0) {
-                printf("Guaranteed win\n");
-            }
         } else {
             move = get_human_move(board, turn);
         }
@@ -113,6 +110,11 @@ move_score_t get_bot_move(board_t *board, int c, int move_num) {
     seconds = (float)(end - start) / CLOCKS_PER_SEC;
     nps = (float)n_nodes / seconds;
     printf("%ld nodes in %.2fs @ %.0f node/s\n", n_nodes, seconds, nps);
+
+    if (result.end && result.score > 0) {
+        printf("Guaranteed win\n");
+    }
+
     return result;
 }
 
