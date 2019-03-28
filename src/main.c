@@ -103,10 +103,10 @@ move_score_t get_bot_move(board_t *board, int c, int move_num) {
     start = clock();
     if (move_num >= 60 - 15) {
         printf("Running end-game solver.\n");
-        result = alphabeta(board, c, -FLT_MAX, FLT_MAX, 60, &n_nodes);
+        result = ab_search(board, c, 60, &n_nodes);
     } else {
         printf("Running alphabeta search.\n");
-        result = alphabeta(board, c, -FLT_MAX, FLT_MAX, 10, &n_nodes);
+        result = ab_search(board, c, 9, &n_nodes);
     }
     end = clock();
 
