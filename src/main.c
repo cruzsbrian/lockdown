@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <float.h>
+#include <time.h>
 
 #include "board/board.h"
 #include "search/search.h"
@@ -61,10 +62,10 @@ int main(int argc, char *argv[]) {
             if (movecol == 0) movecol += 8;
             moverow = 'a' + (move - movecol + 1) / 8;
 
-            printf("Bot move: %c%d (%d)\n", moverow, movecol, move);
-            printf("Score: %.2f\n", bot_move.score);
+            printf("\nBot move: %c%d (score %.2f)\n",
+                    moverow, movecol, bot_move.score);
             if (bot_move.end && bot_move.score > 0) {
-                printf("Guaranteed win.\n");
+                printf("Guaranteed win\n");
             }
         } else {
             move = get_human_move(board, turn);
@@ -94,11 +95,25 @@ int main(int argc, char *argv[]) {
 
 
 move_score_t get_bot_move(board_t *board, int c, int move_num) {
-    if (move_num > 60 - 22) {
-        return alphabeta(board, c, -FLT_MAX, FLT_MAX, 24);
+    move_score_t result;
+    long n_nodes = 0L;
+    clock_t start, end;
+    float seconds, nps;
+
+    start = clock();
+    if (move_num >= 60 - 15) {
+        printf("Running end-game solver.\n");
+        result = alphabeta(board, c, -FLT_MAX, FLT_MAX, 60, &n_nodes);
     } else {
-        return alphabeta(board, c, -FLT_MAX, FLT_MAX, 10);
+        printf("Running alphabeta search.\n");
+        result = alphabeta(board, c, -FLT_MAX, FLT_MAX, 10, &n_nodes);
     }
+    end = clock();
+
+    seconds = (float)(end - start) / CLOCKS_PER_SEC;
+    nps = (float)n_nodes / seconds;
+    printf("%ld nodes in %.2fs @ %.0f node/s\n", n_nodes, seconds, nps);
+    return result;
 }
 
 int get_human_move(board_t *board, int c) {

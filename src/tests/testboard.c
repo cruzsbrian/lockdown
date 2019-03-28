@@ -18,13 +18,9 @@ int main(void) {
 
     print_board(board);
 
-    get_scored_moves(&moves, &n_moves, board, BLACK);
-    for (ii = 0; ii < n_moves; ++ii) {
-        printf("Move: %d, Score: %2.f\n", moves[ii].pos, moves[ii].score);
-    }
-
-    free(moves);
     free(board);
+
+    printf("%ld", sizeof(float));
 
     /*printf("%d\n", _pext_u32(0xffffffff, 0x00000005));*/
 

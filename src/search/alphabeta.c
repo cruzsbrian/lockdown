@@ -9,11 +9,13 @@
 #include "../eval/table_eval.h"
 
 
-move_score_t alphabeta(board_t *board, int c, float alpha, float beta, int depth) {
+move_score_t alphabeta(board_t *board, int c, float alpha, float beta, int depth, long *n) {
     uint64_t moves, old_b, old_w;
     int move;
     float score;
     move_score_t best_move, result;
+
+    (*n)++;
 
     best_move.pos = -1;
     best_move.end = 0;
@@ -35,7 +37,7 @@ move_score_t alphabeta(board_t *board, int c, float alpha, float beta, int depth
 
     /* If no moves available, pass and continue down. */
     if (moves == 0L) {
-        result = alphabeta(board, !c, -beta, -alpha, depth - 1);
+        result = alphabeta(board, !c, -beta, -alpha, depth - 1, n);
         score = -result.score;
         if (score >= beta) {
             best_move.score = beta;
@@ -58,20 +60,22 @@ move_score_t alphabeta(board_t *board, int c, float alpha, float beta, int depth
 
         /* Make move and get its score. */
         do_move(board, move, c);
-        result = alphabeta(board, !c, -beta, -alpha, depth - 1);
+        result = alphabeta(board, !c, -beta, -alpha, depth - 1, n);
         score = -result.score;
         
         /* Undo move. */
         board->b = old_b;
         board->w = old_w;
 
-        /* If move leads to a guaranteed win, return it. */
-        if (result.end && score > 0) {
-            best_move.pos = move;
-            best_move.score = score;
-            best_move.end = result.end;
-            return best_move;
-        }
+        /*
+         *[> If move leads to a guaranteed win, return it. <]
+         *if (result.end && score > 0) {
+         *    best_move.pos = move;
+         *    best_move.score = score;
+         *    best_move.end = result.end;
+         *    return best_move;
+         *}
+         */
 
         /*
          * If score is above beta, opponent won't allow this board state to be
