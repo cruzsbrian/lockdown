@@ -13,20 +13,14 @@ int main(void) {
     int ii;
 
     board_t *board = create_board();
-    board->b = 0L;
-    board->w = 0L;
-
-    add_piece(board, 27, WHITE);
-    add_piece(board, 28, BLACK);
-    add_piece(board, 35, BLACK);
-    add_piece(board, 36, WHITE);
-    add_piece(board, 26, WHITE);
+    board->b = 0x0000000808202400;
+    board->w = 0x00000010161f1b3f;
 
     print_board(board);
 
-    print_bits(get_flippable(board, BLACK));
-
     free(board);
+
+    printf("%ld", sizeof(float));
 
     /*printf("%d\n", _pext_u32(0xffffffff, 0x00000005));*/
 

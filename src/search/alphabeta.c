@@ -44,17 +44,15 @@ move_score_t ab_search(board_t *board, int c, int depth, long *n) {
 
         score = -result.score;
 
-/*
- *        [> If move leads to guaranteed win, return it. <]
- *        if (result.end && score > 0) {
- *            printf("score %.2f (guaranteed win)\n", score);
- *
- *            best_move.pos = move.pos;
- *            best_move.score = score;
- *            best_move.end = 1;
- *            return best_move;
- *        }
- */
+        /* If move leads to guaranteed win, return it. */
+        if (result.end && score > 0) {
+            printf("score %.2f (guaranteed win)\n", score);
+
+            best_move.pos = move.pos;
+            best_move.score = score;
+            best_move.end = 1;
+            return best_move;
+        }
 
         if (score > best_move.score) {
             printf("score %.2f\n", score);

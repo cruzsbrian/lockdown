@@ -112,7 +112,7 @@ move_score_t get_bot_move(board_t *board, int c, int move_num) {
     printf("%ld nodes in %.2fs @ %.0f node/s\n", n_nodes, seconds, nps);
 
     if (result.end && result.score > 0) {
-        printf("G U A R A N T E E D   W I N\n");
+        printf("Guaranteed win\n");
     }
 
     return result;
