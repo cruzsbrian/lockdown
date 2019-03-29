@@ -124,7 +124,7 @@ move_score_t alphabeta(board_t *board, int c, float alpha, float beta, int depth
         do_move(board, move, c);
         result = alphabeta(board, !c, -beta, -alpha, depth - 1, n);
         score = -result.score;
-        
+
         /* Undo move. */
         board->b = old_b;
         board->w = old_w;
@@ -162,6 +162,7 @@ void get_scored_moves(move_score_t **move_arr, size_t *n, board_t *board, int c)
     int move;
     uint64_t old_b, old_w;
     uint64_t moves_mask = get_moves(board, c);
+    long ab_n;
 
     *move_arr = malloc(24 * sizeof(move_score_t));
     if (*move_arr == NULL) {
@@ -170,6 +171,7 @@ void get_scored_moves(move_score_t **move_arr, size_t *n, board_t *board, int c)
     }
 
     *n = 0;
+    ab_n = 0;
     while (moves_mask) {
         move = __builtin_ctzll(moves_mask);
         moves_mask &= moves_mask - 1;
@@ -180,7 +182,7 @@ void get_scored_moves(move_score_t **move_arr, size_t *n, board_t *board, int c)
         old_w = board->w;
 
         do_move(board, move, c);
-        (*move_arr)[*n].score = table_eval(board, c);
+        (*move_arr)[*n].score = alphabeta(board, c, -FLT_MAX, FLT_MAX, 3, &ab_n).score;
 
         board->b = old_b;
         board->w = old_w;
