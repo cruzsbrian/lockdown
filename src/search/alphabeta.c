@@ -180,7 +180,7 @@ void get_scored_moves(move_score_t **move_arr, size_t *n, board_t *board, int c)
         old_w = board->w;
 
         do_move(board, move, c);
-        (*move_arr)[*n].score = alphabeta(board, c, -FLT_MAX, FLT_MAX, 3, &ab_n).score;
+        (*move_arr)[*n].score = table_eval(board, c);
 
         board->b = old_b;
         board->w = old_w;
@@ -195,5 +195,5 @@ void get_scored_moves(move_score_t **move_arr, size_t *n, board_t *board, int c)
 int compare_moves(const void *m1, const void *m2) {
     float s1 = ((move_score_t *)m1)->score;
     float s2 = ((move_score_t *)m2)->score;
-    return s2 - s1;
+    return (int)(s2 - s1);
 }

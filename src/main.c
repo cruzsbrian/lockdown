@@ -103,7 +103,7 @@ move_score_t get_bot_move(board_t *board, int c, int move_num) {
         result = ab_search(board, c, 60, &n_nodes);
     } else {
         printf("Running alphabeta search.\n");
-        result = ab_search(board, c, 9, &n_nodes);
+        result = ab_search(board, c, 10, &n_nodes);
     }
     end = clock();
 
