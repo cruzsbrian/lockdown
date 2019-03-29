@@ -218,6 +218,57 @@ uint64_t get_moves(board_t *board, int c) {
 
 
 
+void get_moves_flips(uint64_t *moves, uint64_t *flips, board_t *board, int c) {
+    uint64_t gen, pro, empty, tmp;
+
+    if (c == BLACK) {
+        gen = board->b;
+        pro = board->w;
+    } else {
+        gen = board->w;
+        pro = board->b;
+    }
+
+    *moves = 0L;
+    *flips = 0L;
+    empty = ~(gen | pro);
+
+    tmp = soutOccl(gen, pro) & pro;
+    if ((tmp >> 8) & empty) *flips |= tmp;
+    *moves |= (tmp >> 8) & empty;
+
+    tmp = nortOccl(gen, pro) & pro;
+    if ((tmp << 8) & empty) *flips |= tmp;
+    *moves |= (tmp << 8) & empty;
+
+    tmp = eastOccl(gen, pro) & pro;
+    if ((tmp << 1) & notAFile & empty) *flips |= tmp;
+    *moves |= (tmp << 1) & notAFile & empty;
+
+    tmp = westOccl(gen, pro) & pro;
+    if ((tmp >> 1) & notHFile & empty) *flips |= tmp;
+    *moves |= (tmp >> 1) & notHFile & empty;
+
+    tmp = noEaOccl(gen, pro) & pro;
+    if ((tmp << 9) & notAFile & empty) *flips |= tmp;
+    *moves |= (tmp << 9) & notAFile & empty;
+
+    tmp = soEaOccl(gen, pro) & pro;
+    if ((tmp >> 7) & notAFile & empty) *flips |= tmp;
+    *moves |= (tmp >> 7) & notAFile & empty;
+
+    tmp = noWeOccl(gen, pro) & pro;
+    if ((tmp << 7) & notHFile & empty) *flips |= tmp;
+    *moves |= (tmp << 7) & notHFile & empty;
+
+    tmp = soWeOccl(gen, pro) & pro;
+    if ((tmp >> 9) & notHFile & empty) *flips |= tmp;
+    *moves |= (tmp >> 9) & notHFile & empty;
+}
+
+
+
+
 /*
  * Make-move:
  * Makes a move for color c in position pos. Give -1 as pos for pass.

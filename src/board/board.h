@@ -38,6 +38,8 @@ uint64_t soWeOccl(uint64_t gen, uint64_t pro);
 
 uint64_t get_moves(board_t *board, int c);
 
+void get_moves_flips(uint64_t *moves, uint64_t *flips, board_t *board, int c);
+
 void do_move(board_t *board, int pos, int c);
 
 void add_piece(board_t *board, int pos, int c);
