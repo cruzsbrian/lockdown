@@ -27,16 +27,8 @@ int popcount_board(board_t *board);
 
 
 /* Move generation and make-move */
-uint64_t soutOccl(uint64_t gen, uint64_t pro);
-uint64_t nortOccl(uint64_t gen, uint64_t pro);
-uint64_t eastOccl(uint64_t gen, uint64_t pro);
-uint64_t westOccl(uint64_t gen, uint64_t pro);
-uint64_t noEaOccl(uint64_t gen, uint64_t pro);
-uint64_t soEaOccl(uint64_t gen, uint64_t pro);
-uint64_t noWeOccl(uint64_t gen, uint64_t pro);
-uint64_t soWeOccl(uint64_t gen, uint64_t pro);
-
 uint64_t get_moves(board_t *board, int c);
+void get_moves_flips(uint64_t *moves, uint64_t *flips, board_t *board, int c);
 
 void do_move(board_t *board, int pos, int c);
 

@@ -27,7 +27,9 @@ const float w_stability     = 5.;
 
 
 float table_eval(board_t *b, int c) {
-    uint64_t own, opp, own_moves, opp_moves;
+    uint64_t own, opp,
+             own_moves, opp_moves,
+             own_flip, opp_flip;
 
     float score = 0.;
 
@@ -39,11 +41,12 @@ float table_eval(board_t *b, int c) {
         opp = b->b;
     }
 
-    own_moves = get_moves(b, c);
-    opp_moves = get_moves(b, !c);
+    get_moves_flips(&own_moves, &own_flip, b, c);
+    get_moves_flips(&opp_moves, &opp_flip, b, !c);
 
-    score += (piece_score(own) - piece_score(opp));
+    score += piece_score(own) - piece_score(opp);
     score += (piece_score(own_moves) - piece_score(opp_moves)) * w_mobility;
+    score += (piece_score(own_flip) - piece_score(opp_flip)) * w_flippable;
 
     return score;
 }
