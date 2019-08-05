@@ -31,7 +31,7 @@ float table_eval(board_t *b, int c) {
              own_moves, opp_moves,
              own_flip, opp_flip;
 
-    float score = 0.;
+    float score = 0;
 
     if (c == BLACK) {
         own = b->b;
