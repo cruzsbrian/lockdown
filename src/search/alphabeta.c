@@ -11,6 +11,12 @@
 
 
 
+/**
+ * Alphabeta-search:
+ * Top-level function to find moves with a given search depth. Sorts moves using
+ * the eval function, then calls alphabeta() on each one to recursively search
+ * it. Parameter n is used for tracking the number of nodes visited.
+ */
 move_score_t ab_search(board_t *board, int c, int depth, long *n) {
     move_score_t *moves;
     board_t old;
@@ -19,12 +25,21 @@ move_score_t ab_search(board_t *board, int c, int depth, long *n) {
     move_score_t best_move, move, result;
     int ii;
 
+    /* Get available moves, sorted by eval score. */
     get_scored_moves(&moves, &n_moves, board, c);
 
+    /*
+     * Initial best_move before search: pass, minimum score, did not reach
+     * end-game.
+     */
     best_move.pos = -1;
     best_move.score = -FLT_MAX;
     best_move.end = 0;
 
+    /*
+     * If there are no available moves, return an accurate score and endgame
+     * flag with a pass.
+     */
     if (n_moves == 0) {
         result = alphabeta(board, !c, -FLT_MAX, FLT_MAX, depth, n);
         best_move.score = -result.score;
@@ -32,16 +47,22 @@ move_score_t ab_search(board_t *board, int c, int depth, long *n) {
         return best_move;
     }
 
+    /* Search each move. */
     for (ii = 0; ii < n_moves; ++ii) {
         move = moves[ii];
 
         printf("Scanning move %2d ... ", move.pos);
 
+        /*
+         * Store old board, apply the move, evaluate with alphabeta, then revert
+         * to the stored board.
+         */
         old = *board;
         do_move(board, move.pos, c);
         result = alphabeta(board, !c, -FLT_MAX, -best_move.score, depth, n);
         *board = old;
 
+        /* Score from alphabeta will be for the opponent. */
         score = -result.score;
 
         /* If move leads to guaranteed win, return it. */
@@ -54,6 +75,10 @@ move_score_t ab_search(board_t *board, int c, int depth, long *n) {
             return best_move;
         }
 
+        /*
+         * If this move is the best one found yet, print score and update
+         * best_move. Otherwise just print newline and go to next.
+         */
         if (score > best_move.score) {
             printf("score %.2f\n", score);
 
@@ -65,18 +90,30 @@ move_score_t ab_search(board_t *board, int c, int depth, long *n) {
         }
     }
 
+    /* Free the array of moves allocated by get_scored_moves(). */
+    free(moves);
+
     return best_move;
 }
 
 
+/**
+ * Alphabeta:
+ * Run the alphabeta minimax algorithm to recursively evaluate a board to a
+ * specified depth. Returns a move_score_t containing the best move, its score,
+ * and whether the game finished. Parameter n is used to track total number of
+ * nodes visited.
+ */
 move_score_t alphabeta(board_t *board, int c, float alpha, float beta, int depth, long *n) {
     uint64_t moves, old_b, old_w;
     int move;
     float score;
     move_score_t best_move, result;
 
+    /* Increment visited node counter. */
     (*n)++;
 
+    /* Initialize best move to pass, did not reach end of game. */
     best_move.pos = -1;
     best_move.end = 0;
 
@@ -152,6 +189,7 @@ move_score_t alphabeta(board_t *board, int c, float alpha, float beta, int depth
 
 
 /**
+ * Get scored moves:
  * Gets all the moves available to color c for board b, puts them in an array,
  * and sorts them. The resulting array is at *move_arr. The number of moves is
  * put into *n. *move_arr must be freed later.
@@ -161,35 +199,51 @@ void get_scored_moves(move_score_t **move_arr, size_t *n, board_t *board, int c)
     uint64_t old_b, old_w;
     uint64_t moves_mask = get_moves(board, c);
 
+    /*
+     * Allocate space for 24 possible moves, which should be more than enough
+     * for any reachable board state. Getting the actual number is too
+     * time-consuming.
+     */
     *move_arr = malloc(24 * sizeof(move_score_t));
     if (*move_arr == NULL) {
         fprintf(stderr, "Error: unable to allocate memory for move array.");
         exit(1);
     }
 
+    /* Loop through all the moves, keeping track of the count with n. */
     *n = 0;
     while (moves_mask) {
+        /*
+         * Find next move by counting trailing zeros in the mask, then zero out
+         * the LSB to remove it from the mask.
+         */
         move = __builtin_ctzll(moves_mask);
         moves_mask &= moves_mask - 1;
 
+        /* Add it to the array. */
         (*move_arr)[*n].pos = move;
 
+        /* Store old board. */
         old_b = board->b;
         old_w = board->w;
 
+        /* Apply the move, score it, and put that in the array element. */
         do_move(board, move, c);
         (*move_arr)[*n].score = table_eval(board, c);
 
+        /* Restore the old board. */
         board->b = old_b;
         board->w = old_w;
 
+        /* Keep track of count. */
         (*n)++;
     }
 
+    /* Finally sort the array using quicksort. */
     qsort(*move_arr, *n, sizeof(move_score_t), compare_moves);
 }
 
-
+/* Comparison function for sorting scored moves. */
 int compare_moves(const void *m1, const void *m2) {
     float s1 = ((move_score_t *)m1)->score;
     float s2 = ((move_score_t *)m2)->score;

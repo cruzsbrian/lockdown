@@ -31,17 +31,6 @@ board_t *copy_board(board_t *old) {
 
 
 
-/*
- * Modeled after strcmp, returns 0 if boards are the same.
- * TODO: make it return 0 for rotated/reflected boards as well.
- */
-int board_compare(board_t *b1, board_t *b2) {
-    return !(b1->b == b2->b && b1->w == b2->w);
-}
-
-
-
-
 /**
  * ========================================
  *            Population Count
@@ -270,7 +259,7 @@ void get_moves_flips(uint64_t *moves, uint64_t *flips, board_t *board, int c) {
 /*
  * Make-move:
  * Makes a move for color c in position pos. Give -1 as pos for pass.
- * Gen is a single-bit long representing the added piece. Filling from gen along
+ * Gen is a one-hot long representing the added piece. Filling from gen along
  * opponent pieces and &-ing with rays in the opposite direction from existing
  * pieces gives only lines of opponent pieces that have the new piece on one
  * side and an existing own piece on the other side.

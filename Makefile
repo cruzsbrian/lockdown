@@ -7,13 +7,11 @@ OBJDIR = obj
 BINDIR = bin
 
 BOARD_SRCS = board.c
-EVAL_SRCS = simple_eval.c table_eval.c
+EVAL_SRCS = table_eval.c
 SEARCH_SRCS = alphabeta.c
-ANAL_SRCS = hash_table.c
 COMMON_SRCS = $(addprefix board/,$(BOARD_SRCS)) \
 			  $(addprefix eval/,$(EVAL_SRCS)) \
 			  $(addprefix search,/$(SEARCH_SRCS)) \
-			  $(addprefix analysis,/$(ANAL_SRCS))
 
 OTHELLO_SRCS = main.c
 TESTBOARD_SRCS = tests/testboard.c
