@@ -7,7 +7,6 @@
 #include "board/board.h"
 #include "search/search.h"
 #include "search/alphabeta.h"
-#include "eval/table_eval.h"
 
 int get_human_move(board_t *board, int c);
 move_score_t get_bot_move(board_t *board, int c, int move_num);
@@ -72,8 +71,7 @@ int main(int argc, char *argv[]) {
             moverow = 'a' + (move - movecol + 1) / 8;
 
             /* Print move with score. */
-            printf("\nBot move: %c%d (score %.2f)\n",
-                    moverow, movecol, bot_move.score);
+            printf("\nBot move: %c%d \n", moverow, movecol);
         } else {
             move = get_human_move(board, turn);
         }
@@ -116,10 +114,10 @@ move_score_t get_bot_move(board_t *board, int c, int move_num) {
 
     start = clock();
 
-    /* Run search. If <=15 moves out, solve to game end. */
-    if (move_num >= 60 - 15) {
+    /* Run search. If <=20 moves out, solve to game end. */
+    if (move_num >= 60 - 20) {
         printf("Running end-game solver.\n");
-        result = ab_search(board, c, 60, &n_nodes);
+        result = endgame_search(board, c, &n_nodes);
     } else {
         printf("Running alphabeta search.\n");
         result = ab_search(board, c, 9, &n_nodes);
@@ -131,11 +129,6 @@ move_score_t get_bot_move(board_t *board, int c, int move_num) {
     seconds = (float)(end - start) / CLOCKS_PER_SEC;
     nps = (float)n_nodes / seconds;
     printf("%ld nodes in %.2fs @ %.0f node/s\n", n_nodes, seconds, nps);
-
-    /* If search reached game end and had a win state, guaranteed win. */
-    if (result.end && result.score > 0) {
-        printf("Guaranteed win\n");
-    }
 
     return result;
 }

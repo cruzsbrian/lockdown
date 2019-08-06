@@ -5,6 +5,7 @@
 #include "search.h"
 
 move_score_t ab_search(board_t *board, int c, int depth, long *n);
+move_score_t endgame_search(board_t *board, int c, long *n);
 
 move_score_t alphabeta(
         board_t *board, int c,

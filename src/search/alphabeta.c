@@ -96,6 +96,61 @@ move_score_t ab_search(board_t *board, int c, int depth, long *n) {
     return best_move;
 }
 
+/**
+ * Endgame search:
+ * Like ab_search, but search until the end of the game always and limit to
+ * win-loss-draw. This gives the (-1, 1) window for alphabeta.
+ */
+move_score_t endgame_search(board_t *board, int c, long *n) {
+    move_score_t *moves;
+    board_t old;
+    size_t n_moves;
+    float score, best_score;
+    move_score_t move, result;
+    int ii;
+
+    /* Get available moves, sorted by eval score. */
+    get_scored_moves(&moves, &n_moves, board, c);
+
+    best_score = -1;
+
+    /* If there are no available moves, pass. */
+    if (n_moves == 0) {
+        move.pos = -1;
+        return move;
+    }
+
+    for (ii = 0; ii < n_moves; ++ii) {
+        move = moves[ii];
+
+        printf("Scanning move %2d ... ", move.pos);
+
+        /*
+         * Store old board, apply the move, evaluate with alphabeta, then revert
+         * to the stored board.
+         */
+        old = *board;
+        do_move(board, move.pos, c);
+        result = alphabeta(board, !c, -1, -best_score, 60, n);
+        *board = old;
+
+        score = -result.score;
+
+        /* Print for win/draw/loss. If a win, immediately return. */
+        if (score > 0) {
+            printf("win\n");
+            return move;
+        } else if (score == 0) {
+            printf("draw\n");
+            best_score = score;
+        } else {
+            printf("loss\n");
+        }
+    }
+
+    return move;
+}
+
 
 /**
  * Alphabeta:
@@ -199,19 +254,17 @@ void get_scored_moves(move_score_t **move_arr, size_t *n, board_t *board, int c)
     uint64_t old_b, old_w;
     uint64_t moves_mask = get_moves(board, c);
 
-    /*
-     * Allocate space for 24 possible moves, which should be more than enough
-     * for any reachable board state. Getting the actual number is too
-     * time-consuming.
-     */
-    *move_arr = malloc(24 * sizeof(move_score_t));
+    /* Get count of moves. */
+    *n = popcount(moves_mask);
+
+    /* Allocate space for array of moves. */
+    *move_arr = malloc(*n * sizeof(move_score_t));
     if (*move_arr == NULL) {
         fprintf(stderr, "Error: unable to allocate memory for move array.");
         exit(1);
     }
 
-    /* Loop through all the moves, keeping track of the count with n. */
-    *n = 0;
+    /* Loop through all moves. */
     while (moves_mask) {
         /*
          * Find next move by counting trailing zeros in the mask, then zero out
@@ -234,9 +287,6 @@ void get_scored_moves(move_score_t **move_arr, size_t *n, board_t *board, int c)
         /* Restore the old board. */
         board->b = old_b;
         board->w = old_w;
-
-        /* Keep track of count. */
-        (*n)++;
     }
 
     /* Finally sort the array using quicksort. */
