@@ -51,7 +51,7 @@ move_score_t ab_search(board_t *board, int c, int depth, long *n) {
     for (ii = 0; ii < n_moves; ++ii) {
         move = moves[ii];
 
-        printf("Scanning move %2d ... ", move.pos);
+        fprintf(stderr, "Scanning move %2d ... ", move.pos);
 
         /*
          * Store old board, apply the move, evaluate with alphabeta, then revert
@@ -67,7 +67,7 @@ move_score_t ab_search(board_t *board, int c, int depth, long *n) {
 
         /* If move leads to guaranteed win, return it. */
         if (result.end && score > 0) {
-            printf("score %.2f (guaranteed win)\n", score);
+            fprintf(stderr, "score %.2f (guaranteed win)\n", score);
 
             best_move.pos = move.pos;
             best_move.score = score;
@@ -80,13 +80,13 @@ move_score_t ab_search(board_t *board, int c, int depth, long *n) {
          * best_move. Otherwise just print newline and go to next.
          */
         if (score > best_move.score) {
-            printf("score %.2f\n", score);
+            fprintf(stderr, "score %.2f\n", score);
 
             best_move.pos = move.pos;
             best_move.score = score;
             best_move.end = result.end;
         } else {
-            printf("\n");
+            fprintf(stderr, "\n");
         }
     }
 
@@ -123,7 +123,7 @@ move_score_t endgame_search(board_t *board, int c, long *n) {
     for (ii = 0; ii < n_moves; ++ii) {
         move = moves[ii];
 
-        printf("Scanning move %2d ... ", move.pos);
+        fprintf(stderr, "Scanning move %2d ... ", move.pos);
 
         /*
          * Store old board, apply the move, evaluate with alphabeta, then revert
@@ -138,13 +138,13 @@ move_score_t endgame_search(board_t *board, int c, long *n) {
 
         /* Print for win/draw/loss. If a win, immediately return. */
         if (score > 0) {
-            printf("win\n");
+            fprintf(stderr, "win\n");
             return move;
         } else if (score == 0) {
-            printf("draw\n");
+            fprintf(stderr, "draw\n");
             best_score = score;
         } else {
-            printf("loss\n");
+            fprintf(stderr, "loss\n");
         }
     }
 
@@ -250,7 +250,7 @@ move_score_t alphabeta(board_t *board, int c, float alpha, float beta, int depth
  * put into *n. *move_arr must be freed later.
  */
 void get_scored_moves(move_score_t **move_arr, size_t *n, board_t *board, int c) {
-    int move;
+    int ii, move;
     uint64_t old_b, old_w;
     uint64_t moves_mask = get_moves(board, c);
 
@@ -265,7 +265,7 @@ void get_scored_moves(move_score_t **move_arr, size_t *n, board_t *board, int c)
     }
 
     /* Loop through all moves. */
-    while (moves_mask) {
+    for (ii = 0; ii < *n; ++ii) {
         /*
          * Find next move by counting trailing zeros in the mask, then zero out
          * the LSB to remove it from the mask.
@@ -274,7 +274,7 @@ void get_scored_moves(move_score_t **move_arr, size_t *n, board_t *board, int c)
         moves_mask &= moves_mask - 1;
 
         /* Add it to the array. */
-        (*move_arr)[*n].pos = move;
+        (*move_arr)[ii].pos = move;
 
         /* Store old board. */
         old_b = board->b;
@@ -282,7 +282,7 @@ void get_scored_moves(move_score_t **move_arr, size_t *n, board_t *board, int c)
 
         /* Apply the move, score it, and put that in the array element. */
         do_move(board, move, c);
-        (*move_arr)[*n].score = table_eval(board, c);
+        (*move_arr)[ii].score = table_eval(board, c);
 
         /* Restore the old board. */
         board->b = old_b;

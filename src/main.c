@@ -8,8 +8,10 @@
 #include "search/search.h"
 #include "search/alphabeta.h"
 
-int get_human_move(board_t *board, int c);
 move_score_t get_bot_move(board_t *board, int c, int move_num);
+int get_opp_move(void);
+
+void print_move(move_score_t move);
 
 /**
  * Main function. Runs a game against a human's input.
@@ -17,7 +19,8 @@ move_score_t get_bot_move(board_t *board, int c, int move_num);
  */
 int main(int argc, char *argv[]) {
     board_t *board;
-    int turn, bot_color, move, move_num;
+    int bot_color, move_num;
+    int opp_move, ms_left;
     move_score_t bot_move;
 
     /* Get bot color from args. */
@@ -28,19 +31,11 @@ int main(int argc, char *argv[]) {
     }
 
     /* Parse bot color arg (number or string). Exit with error if not valid. */
-    if (strcmp(argv[1],"0") == 0 || strcmp(argv[1],"black") == 0) {
+    if (strcmp(argv[1],"Black") == 0) {
         bot_color = BLACK;
-    }
-    else if (strcmp(argv[1],"1") == 0 || strcmp(argv[1],"white") == 0 ) {
+    } else {
         bot_color = WHITE;
     }
-    else {
-        fprintf(stderr, "Invalid bot color argument.\n");
-        exit(1);
-    }
-
-    printf("Bot color: %s\n", bot_color ? "white" : "black");
-
 
     /* Set up the board, with the four starting pieces. */
     board = create_board();
@@ -51,49 +46,22 @@ int main(int argc, char *argv[]) {
     add_piece(board, 35, BLACK);
     add_piece(board, 36, WHITE);
 
-
-    /* Run the game. */
-    print_board(board);
-
-    turn = BLACK;
     move_num = 0;
 
-    /* Loop until neither player can move. */
-    while (get_moves(board, BLACK) || get_moves(board, WHITE)) {
-        if (turn == bot_color) {
-            int movecol;
-            char moverow;
+    printf("Init done \n");
+    fflush(stdout);
 
-            /* Get move from bot, parse into row and column format */
-            bot_move = get_bot_move(board, turn, move_num);
-            move = bot_move.pos;
-            movecol = (move % 8) + 1;
-            moverow = 'a' + (move - movecol + 1) / 8;
+    while (1) {
+        opp_move = get_opp_move();
 
-            /* Print move with score. */
-            printf("\nBot move: %c%d \n", moverow, movecol);
-        } else {
-            move = get_human_move(board, turn);
-        }
+        do_move(board, opp_move, !bot_color);
 
-        /* Apply the move and print the board. */
-        do_move(board, move, turn);
-        print_board(board);
+        bot_move = get_bot_move(board, bot_color, move_num);
+        do_move(board, bot_move.pos, bot_color);
 
-        /* Advance by one turn, switch sides. */
-        move_num++;
-        turn = !turn;
-    }
+        print_move(bot_move);
 
-
-    /* Game over: print winner/draw. */
-    printf("Game over: ");
-    if (popcount(board->b) > popcount(board->w)) {
-        printf("black wins.\n");
-    } else if (popcount(board->b) < popcount(board->w)) {
-        printf("white wins.\n");
-    } else {
-        printf("draw.\n");
+        move_num += 2;
     }
 
     free(board);
@@ -116,10 +84,10 @@ move_score_t get_bot_move(board_t *board, int c, int move_num) {
 
     /* Run search. If <=20 moves out, solve to game end. */
     if (move_num >= 60 - 20) {
-        printf("Running end-game solver.\n");
+        fprintf(stderr, "Running end-game solver.\n");
         result = endgame_search(board, c, &n_nodes);
     } else {
-        printf("Running alphabeta search.\n");
+        fprintf(stderr, "Running alphabeta search.\n");
         result = ab_search(board, c, 9, &n_nodes);
     }
 
@@ -128,48 +96,34 @@ move_score_t get_bot_move(board_t *board, int c, int move_num) {
     /* Convert search time to seconds, find nodes per second, print. */
     seconds = (float)(end - start) / CLOCKS_PER_SEC;
     nps = (float)n_nodes / seconds;
-    printf("%ld nodes in %.2fs @ %.0f node/s\n", n_nodes, seconds, nps);
+    fprintf(stderr, "%ld nodes in %.2fs @ %.0f node/s\n",
+            n_nodes, seconds, nps);
 
     return result;
 }
 
-/**
- * Get move from human input. Check that move is legal and reprompt if needed.
- * If human has no legal moves, automatically pass (print this as their move and
- * return -1).
- */
-int get_human_move(board_t *board, int c) {
-    int move;
-    char moverow;
+int get_opp_move(void) {
+    int x, y, ms_left;
 
-    /* Get set of legal moves for input checking. */
-    uint64_t legal_moves = get_moves(board, c);
+    scanf("%d %d %d", &x, &y, &ms_left);
+    fprintf(stderr, "%d %d \n", x, y);
 
-    /* 
-     * Prompt for human move. If there are no legal moves, print pass and
-     * immediately return -1.
-     */
-    printf("Opponent move: ");
-    if (!legal_moves) {
-        printf("pass\n");
-        return -1;
+    if (x == -1 && y == -1) return -1;
+
+    return y * 8 + x;
+}
+
+void print_move(move_score_t move) {
+    int x, y;
+
+    if (move.pos == -1) {
+        x = -1;
+        y = -1;
+    } else {
+        x = move.pos % 8;
+        y = move.pos / 8;
     }
 
-    /* 
-     * Scan for human move. Include a space in the format string so the \n from
-     * the last input doesn't get counted.
-     */
-    scanf(" %c%d", &moverow, &move);
-
-    /* Convert row-column format to 0-63 move format. */
-    move--;
-    move += 8 * (moverow - 'a');
-
-    /* Check that the move is legal. If not, reprompt recursively. */
-    if (!((1L << move) & legal_moves)) {
-        printf("Illegal move \"%d\"\n", move);
-        return get_human_move(board, c);
-    }
-
-    return move;
+    printf("%d %d\n", x, y);
+    fflush(stdout);
 }
