@@ -13,7 +13,7 @@ COMMON_SRCS = $(addprefix board/,$(BOARD_SRCS)) \
 			  $(addprefix eval/,$(EVAL_SRCS)) \
 			  $(addprefix search,/$(SEARCH_SRCS)) \
 
-OTHELLO_SRCS = main.c
+OTHELLO_SRCS = main.c player.c
 TESTBOARD_SRCS = tests/testboard.c
 TESTSEARCH_SRCS = tests/testnegamax.c
 
