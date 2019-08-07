@@ -8,10 +8,10 @@ BINDIR = bin
 
 BOARD_SRCS = board.c
 EVAL_SRCS = table_eval.c
-SEARCH_SRCS = alphabeta.c
+SEARCH_SRCS = search.c alphabeta.c move_ordering.c
 COMMON_SRCS = $(addprefix board/,$(BOARD_SRCS)) \
 			  $(addprefix eval/,$(EVAL_SRCS)) \
-			  $(addprefix search,/$(SEARCH_SRCS)) \
+			  $(addprefix search/,$(SEARCH_SRCS)) \
 
 OTHELLO_SRCS = main.c player.c
 TESTBOARD_SRCS = tests/testboard.c
