@@ -23,12 +23,15 @@ void player_init(int c) {
     add_piece(board, 28, BLACK);
     add_piece(board, 35, BLACK);
     add_piece(board, 36, WHITE);
+
+    search_init();
 }
 
 /**
  * Player free: frees the board allocated for the player.
  */
 void player_free(void) {
+    search_free();
     free(board);
 }
 

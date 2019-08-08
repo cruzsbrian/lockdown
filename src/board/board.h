@@ -10,6 +10,7 @@
 typedef struct {
     uint64_t b;
     uint64_t w;
+    uint16_t hash;
 } board_t;
 
 
@@ -18,7 +19,8 @@ board_t *create_board(void);
 board_t *copy_board(board_t *old);
 
 
-int board_compare(board_t *b1, board_t *b2);
+/* Hashing */
+void init_hash(void);
 
 
 /* Population count */

@@ -9,14 +9,29 @@
 #include "../board/board.h"
 #include "../eval/table_eval.h"
 #include "alphabeta.h"
+#include "move_ordering.h"
+#include "trans_table.h"
 
 
-const int DEPTH = 9;
+const int DEPTH = 10;
 const int ENDGAME_MOVES = 20;
 
 
 int ab_search(board_t *board, int c, int depth, long *n);
 int endgame_search(board_t *board, int c, long *n);
+
+
+trans_table_t *trans_table;
+
+
+void search_init() {
+    init_hash();
+    trans_table = init_trans_table();
+}
+
+void search_free() {
+    free_trans_table(trans_table);
+}
 
 
 int search(board_t *board, int c, int move_num) {
@@ -59,7 +74,7 @@ int ab_search(board_t *board, int c, int depth, long *n) {
     int ii;
 
     /* Get available moves, sorted by eval score. */
-    get_scored_moves(&moves, &n_moves, board, c);
+    get_scored_moves(&moves, &n_moves, board, c, trans_table);
 
     /* Start with minimum score */
     best_score = -FLT_MAX;
@@ -82,7 +97,7 @@ int ab_search(board_t *board, int c, int depth, long *n) {
          */
         old = *board;
         do_move(board, move, c);
-        result = alphabeta(board, !c, -FLT_MAX, -best_score, depth, n);
+        result = alphabeta(board, !c, -FLT_MAX, -best_score, depth, trans_table, n, 1);
         *board = old;
 
         /* Score from alphabeta will be for the opponent. */
@@ -125,7 +140,7 @@ int endgame_search(board_t *board, int c, long *n) {
     int ii;
 
     /* Get available moves, sorted by eval score. */
-    get_scored_moves(&moves, &n_moves, board, c);
+    get_scored_moves(&moves, &n_moves, board, c, trans_table);
 
     best_score = -1;
 
@@ -145,7 +160,7 @@ int endgame_search(board_t *board, int c, long *n) {
          */
         old = *board;
         do_move(board, move, c);
-        result = alphabeta(board, !c, -1, -best_score, 60, n);
+        result = alphabeta(board, !c, -1, -best_score, 60, trans_table, n, 0);
         *board = old;
 
         score = -result.score;

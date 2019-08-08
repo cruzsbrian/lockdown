@@ -7,6 +7,8 @@
 #include <float.h>
 #include "../board/board.h"
 #include "../eval/table_eval.h"
+#include "alphabeta.h"
+#include "trans_table.h"
 
 
 int compare_moves(const void *m1, const void *m2);
@@ -18,7 +20,7 @@ int compare_moves(const void *m1, const void *m2);
  * and sorts them. The resulting array is at *move_arr. The number of moves is
  * put into *n. *move_arr must be freed later.
  */
-void get_scored_moves(move_score_t **move_arr, size_t *n, board_t *board, int c) {
+void get_scored_moves(move_score_t **move_arr, size_t *n, board_t *board, int c, trans_table_t *tt) {
     int ii, move;
     board_t old;
     uint64_t moves_mask = get_moves(board, c);
@@ -35,6 +37,10 @@ void get_scored_moves(move_score_t **move_arr, size_t *n, board_t *board, int c)
 
     /* Loop through all moves. */
     for (ii = 0; ii < *n; ++ii) {
+        int found;
+        char prev_depth;
+        float score;
+
         /*
          * Find next move by counting trailing zeros in the mask, then zero out
          * the LSB to remove it from the mask.
@@ -50,7 +56,10 @@ void get_scored_moves(move_score_t **move_arr, size_t *n, board_t *board, int c)
 
         /* Apply the move, score it, and put that in the array element. */
         do_move(board, move, c);
-        (*move_arr)[ii].score = table_eval(board, c);
+
+        found = lookup_score(tt, *board, c, &score, &prev_depth);
+        if (!found) score = 0;
+        (*move_arr)[ii].score = score;
 
         /* Restore the old board. */
         *board = old;

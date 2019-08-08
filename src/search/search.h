@@ -10,6 +10,9 @@ typedef struct {
     int end; /* if leads to endgame */
 } move_score_t;
 
+void search_init(void);
+void search_free(void);
+
 /* Search game tree for best move for color c. */
 int search(board_t *board, int c, int move_num);
 

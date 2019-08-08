@@ -7,6 +7,7 @@
 #include <float.h>
 #include "../board/board.h"
 #include "../eval/table_eval.h"
+#include "trans_table.h"
 
 
 /**
@@ -16,7 +17,8 @@
  * and whether the game finished. Parameter n is used to track total number of
  * nodes visited.
  */
-move_score_t alphabeta(board_t *board, int c, float alpha, float beta, int depth, long *n) {
+move_score_t alphabeta(board_t *board, int c, float alpha, float beta,
+                       int depth, trans_table_t *tt, long *n, int use_tt) {
     board_t old;
     uint64_t moves;
     int move;
@@ -47,7 +49,7 @@ move_score_t alphabeta(board_t *board, int c, float alpha, float beta, int depth
 
     /* If no moves available, pass and continue down. */
     if (moves == 0L) {
-        result = alphabeta(board, !c, -beta, -alpha, depth - 1, n);
+        result = alphabeta(board, !c, -beta, -alpha, depth - 1, tt, n, use_tt);
         score = -result.score;
         if (score >= beta) {
             best_move.score = beta;
@@ -69,8 +71,12 @@ move_score_t alphabeta(board_t *board, int c, float alpha, float beta, int depth
 
         /* Make move and get its score. */
         do_move(board, move, c);
-        result = alphabeta(board, !c, -beta, -alpha, depth - 1, n);
+        result = alphabeta(board, !c, -beta, -alpha, depth - 1, tt, n, use_tt);
         score = -result.score;
+
+        if (depth > 7 && use_tt) {
+            set_score(tt, *board, c, score, depth);
+        }
 
         /* Undo move. */
         *board = old;
@@ -87,7 +93,6 @@ move_score_t alphabeta(board_t *board, int c, float alpha, float beta, int depth
         /* If score is above alpha, record it as best and set alpha to score. */
         if (score > alpha) {
             best_move.pos = move;
-            best_move.end = result.end;
             alpha = score;
         }
     }

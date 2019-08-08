@@ -18,12 +18,12 @@ const uint64_t m_other  = 0x007e7e7e7e7e7e00;
 
 
 /* Weights for different score metrics. */
-const float w_corner        = 20.;
-const float w_edge          = 6.;
-const float w_other         = 1.;
-const float w_mobility      = 4.;
-const float w_flippable     = 0.5;
-const float w_stability     = 5.;
+const float w_corner     = 20.;
+const float w_edge       = 6.;
+const float w_other      = 1.;
+const float w_mobility   = 5.;
+const float w_flippable  = 0.5;
+const float w_stability  = 5.;
 
 
 

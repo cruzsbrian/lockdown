@@ -4,6 +4,9 @@
 #include "board.h"
 
 
+uint16_t hash_vals[2][64];
+
+
 /**
  * ========================================
  *              Board Creation
@@ -25,7 +28,22 @@ board_t *copy_board(board_t *old) {
     board_t *new_board = create_board();
     new_board->b = old->b;
     new_board->w = old->w;
+    new_board->hash = old->hash;
     return new_board;
+}
+
+
+
+
+void init_hash() {
+    int ii;
+
+    srand(1337);
+
+    for (ii = 0; ii < 64; ++ii) {
+        hash_vals[0][ii] = rand();
+        hash_vals[1][ii] = rand();
+    }
 }
 
 
@@ -257,12 +275,12 @@ void get_moves_flips(uint64_t *moves, uint64_t *flips, board_t *board, int c) {
 
 
 /*
- * Make-move:
- * Makes a move for color c in position pos. Give -1 as pos for pass.
- * Gen is a one-hot long representing the added piece. Filling from gen along
- * opponent pieces and &-ing with rays in the opposite direction from existing
- * pieces gives only lines of opponent pieces that have the new piece on one
- * side and an existing own piece on the other side.
+ * Make-move: Makes a move for color c in position pos, and updates the board's
+ * hash. Give -1 as pos for pass.  Gen is a one-hot long representing the added
+ * piece. Filling from gen along opponent pieces and &-ing with rays in the
+ * opposite direction from existing pieces gives only lines of opponent pieces
+ * that have the new piece on one side and an existing own piece on the other
+ * side.
  */
 void do_move(board_t *board, int pos, int c) {
     uint64_t gen, own, pro, diff;
@@ -298,6 +316,7 @@ void do_move(board_t *board, int pos, int c) {
 
     board->b ^= diff;
     board->w ^= diff;
+    board->hash ^= hash_vals[c][pos];
 }
 
 void add_piece(board_t *board, int pos, int c) {
@@ -306,6 +325,8 @@ void add_piece(board_t *board, int pos, int c) {
     } else {
         board->w |= (1L << pos);
     }
+
+    board->hash ^= hash_vals[c][pos];
 }
 
 

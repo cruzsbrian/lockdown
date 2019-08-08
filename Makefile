@@ -8,7 +8,7 @@ BINDIR = bin
 
 BOARD_SRCS = board.c
 EVAL_SRCS = table_eval.c
-SEARCH_SRCS = search.c alphabeta.c move_ordering.c
+SEARCH_SRCS = search.c alphabeta.c move_ordering.c trans_table.c
 COMMON_SRCS = $(addprefix board/,$(BOARD_SRCS)) \
 			  $(addprefix eval/,$(EVAL_SRCS)) \
 			  $(addprefix search/,$(SEARCH_SRCS)) \
