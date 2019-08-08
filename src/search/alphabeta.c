@@ -18,7 +18,7 @@
  * nodes visited.
  */
 move_score_t alphabeta(board_t *board, int c, float alpha, float beta,
-                       int depth, trans_table_t *tt, long *n, int use_tt) {
+                       int depth, int max_depth, trans_table_t *tt, long *n, int use_tt) {
     board_t old;
     uint64_t moves;
     int move;
@@ -33,7 +33,7 @@ move_score_t alphabeta(board_t *board, int c, float alpha, float beta,
     best_move.end = 0;
 
     /* If depth reached, evaluate and return. */
-    if (depth == 0) {
+    if (depth == max_depth) {
         best_move.score = table_eval(board, c);
         return best_move;
     }
@@ -49,7 +49,7 @@ move_score_t alphabeta(board_t *board, int c, float alpha, float beta,
 
     /* If no moves available, pass and continue down. */
     if (moves == 0L) {
-        result = alphabeta(board, !c, -beta, -alpha, depth - 1, tt, n, use_tt);
+        result = alphabeta(board, !c, -beta, -alpha, depth + 1, max_depth, tt, n, use_tt);
         score = -result.score;
         if (score >= beta) {
             best_move.score = beta;
@@ -71,11 +71,11 @@ move_score_t alphabeta(board_t *board, int c, float alpha, float beta,
 
         /* Make move and get its score. */
         do_move(board, move, c);
-        result = alphabeta(board, !c, -beta, -alpha, depth - 1, tt, n, use_tt);
+        result = alphabeta(board, !c, -beta, -alpha, depth + 1, max_depth, tt, n, use_tt);
         score = -result.score;
 
-        if (depth > 7 && use_tt) {
-            set_score(tt, *board, c, score, depth);
+        if (depth <= 2 && use_tt) {
+            set_score(tt, *board, c, score, max_depth - depth);
         }
 
         /* Undo move. */

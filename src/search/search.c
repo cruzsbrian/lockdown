@@ -13,8 +13,8 @@
 #include "trans_table.h"
 
 
-const int DEPTH = 10;
-const int ENDGAME_MOVES = 20;
+const int DEPTH = 7;
+const int ENDGAME_MOVES = 15;
 
 
 int ab_search(board_t *board, int c, int depth, long *n);
@@ -97,7 +97,7 @@ int ab_search(board_t *board, int c, int depth, long *n) {
          */
         old = *board;
         do_move(board, move, c);
-        result = alphabeta(board, !c, -FLT_MAX, -best_score, depth, trans_table, n, 1);
+        result = alphabeta(board, !c, -FLT_MAX, -best_score, 0, depth, trans_table, n, 1);
         *board = old;
 
         /* Score from alphabeta will be for the opponent. */
@@ -160,7 +160,7 @@ int endgame_search(board_t *board, int c, long *n) {
          */
         old = *board;
         do_move(board, move, c);
-        result = alphabeta(board, !c, -1, -best_score, 60, trans_table, n, 0);
+        result = alphabeta(board, !c, -1, -best_score, 0, 60, trans_table, n, 0);
         *board = old;
 
         score = -result.score;

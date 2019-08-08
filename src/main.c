@@ -5,7 +5,7 @@
 #include "player.h"
 
 
-void read_move(int *move, int *ms_left);
+int read_move(int *move, int *ms_left);
 void print_move(int move);
 
 
@@ -36,9 +36,7 @@ int main(int argc, char *argv[]) {
     fflush(stdout);
 
     /* Game loop. */
-    while (1) {
-        read_move(&opp_move, &ms_left);
-
+    while (read_move(&opp_move, &ms_left)) {
         /* Print blank lines before/after our debug messages. */
         fprintf(stderr, "\n");
         bot_move = next_move(opp_move, ms_left);
@@ -57,16 +55,18 @@ int main(int argc, char *argv[]) {
  * Read move: reads a move and time left in "x y ms_left" format and stores the
  * move as a 0-63 index in *move and the time in *ms_left.
  */
-void read_move(int *move, int *ms_left) {
-    int x, y;
+int read_move(int *move, int *ms_left) {
+    int x, y, code;
 
-    scanf("%d %d %d", &x, &y, ms_left);
+    code = scanf("%d %d %d", &x, &y, ms_left) != EOF;
 
     if (x == -1 && y == -1) {
         *move = -1;
     } else {
         *move = y * 8 + x;
     }
+    
+    return code;
 }
 
 /**
