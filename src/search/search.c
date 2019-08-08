@@ -13,15 +13,15 @@
 #include "trans_table.h"
 
 
-const int DEPTH = 7;
-const int ENDGAME_MOVES = 15;
+const int DEPTH = 9;
+const int ENDGAME_MOVES = 20;
 
 
 int ab_search(board_t *board, int c, int depth, long *n);
 int endgame_search(board_t *board, int c, long *n);
 
 
-trans_table_t *trans_table;
+node_t *trans_table;
 
 
 void search_init() {
@@ -74,7 +74,7 @@ int ab_search(board_t *board, int c, int depth, long *n) {
     int ii;
 
     /* Get available moves, sorted by eval score. */
-    get_scored_moves(&moves, &n_moves, board, c, trans_table);
+    get_scored_moves(&moves, &n_moves, board, c, trans_table, n);
 
     /* Start with minimum score */
     best_score = -FLT_MAX;
@@ -140,7 +140,7 @@ int endgame_search(board_t *board, int c, long *n) {
     int ii;
 
     /* Get available moves, sorted by eval score. */
-    get_scored_moves(&moves, &n_moves, board, c, trans_table);
+    get_scored_moves(&moves, &n_moves, board, c, trans_table, n);
 
     best_score = -1;
 

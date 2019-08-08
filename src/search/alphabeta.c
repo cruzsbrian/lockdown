@@ -18,7 +18,7 @@
  * nodes visited.
  */
 move_score_t alphabeta(board_t *board, int c, float alpha, float beta,
-                       int depth, int max_depth, trans_table_t *tt, long *n, int use_tt) {
+                       int depth, int max_depth, node_t *tt, long *n, int use_tt) {
     board_t old;
     uint64_t moves;
     int move;
@@ -74,8 +74,9 @@ move_score_t alphabeta(board_t *board, int c, float alpha, float beta,
         result = alphabeta(board, !c, -beta, -alpha, depth + 1, max_depth, tt, n, use_tt);
         score = -result.score;
 
-        if (depth <= 2 && use_tt) {
-            set_score(tt, *board, c, score, max_depth - depth);
+        if (depth == 1 && use_tt) {
+            /* fprintf(stderr, "\tSetting trans table for move %d for color %d\n", move, c); */
+            set_score(tt, *board, !c, result.score, max_depth - depth);
         }
 
         /* Undo move. */

@@ -5,111 +5,67 @@
 #include <stdint.h>
 
 
-uint16_t hash(board_t key);
+uint32_t hash(board_t key);
 int is_equal(board_t key1, board_t key2, char turn1, char turn2) {
     return key1.w == key2.w && key1.b == key2.b && turn1 == turn2;
 }
 
-node_t *create_node(board_t key, char turn, float score, char depth);
-void free_list(node_t *list);
 
-
-uint16_t hash(board_t key) {
+uint32_t hash(board_t key) {
     return key.hash;
 }
 
 
-node_t *create_node(board_t key, char turn, float score, char depth) {
-    node_t *new_node = (node_t *)malloc(sizeof(node_t));
-
-    if (new_node == NULL) {
-        fprintf(stderr, "Error: ran out of memory for trans table.");
-        exit(1);
-    }
-
-    new_node->key   = key;
-    new_node->turn  = turn;
-    new_node->score = score;
-    new_node->depth = depth;
-    new_node->next  = NULL;
-
-    return new_node;
-}
-
-void free_list(node_t *list) {
-    node_t *tmp;
-
-    while (list) {
-        tmp = list->next;
-        free(list);
-        list = tmp;
-    }
-}
-
-
-trans_table_t *init_trans_table() {
+node_t *init_trans_table() {
     int ii;
 
-    trans_table_t *tt = (trans_table_t *)malloc(sizeof(trans_table_t));
-    tt->slot = (node_t **)malloc(NSLOTS * sizeof(node_t *));
+    node_t *tt = (node_t *)malloc(NSLOTS * sizeof(node_t));
 
     for (ii = 0; ii < NSLOTS; ++ii) {
-        tt->slot[ii] = NULL;
+        board_t key = { 0L, 0L, 0L };
+        tt[ii].key = key;
+        tt[ii].turn = 0;
+        tt[ii].score = 0.;
+        tt[ii].depth = 0;
     }
 
     return tt;
 }
 
-void free_trans_table(trans_table_t *tt) {
-    int ii;
-
-    for (ii = 0; ii < NSLOTS; ++ii) {
-        free_list(tt->slot[ii]);
-    }
-
-    free(tt->slot);
-
+void free_trans_table(node_t *tt) {
     free(tt);
 }
 
 
-int lookup_score(trans_table_t *tt, board_t key, char turn, float *score, char *depth) {
-    uint16_t hash_val;
-    node_t *list;
+int lookup_score(node_t *tt, board_t key, char turn, float *score, char *depth) {
+    uint32_t hash_val;
+    node_t slot;
 
     hash_val = hash(key);
-    list = tt->slot[hash_val];
 
-    while(list && !is_equal(key, list->key, turn, list->turn)) {
-        list = list->next;
-    }
+    /* fprintf(stderr, "\tLooking up trans table @ hash %d\n\t Board %lx %lx\n", hash_val, key.b, key.w); */
 
-    if (list) {
-        *score = list->score;
-        *depth = list->depth;
+    slot = tt[hash_val];
+
+    if (is_equal(slot.key, key, slot.turn, turn)) {
+        /* fprintf(stderr, "\tFound, score %.2f for color %d\n", slot.score, slot.turn); */
+        *score = slot.score;
+        *depth = slot.depth;
         return 1;
     }
 
     return 0;
 }
 
-void set_score(trans_table_t *tt, board_t key, char turn, float score, char depth) {
-    uint16_t hash_val;
-    node_t *list, *new_node;
+void set_score(node_t *tt, board_t key, char turn, float score, char depth) {
+    uint32_t hash_val;
 
     hash_val = hash(key);
-    list = tt->slot[hash_val];
 
-    while(list && !is_equal(key, list->key, turn, list->turn)) {
-        list = list->next;
-    }
+    /* fprintf(stderr, "\tSetting trans table @ hash %d\n\t Board %lx %lx\n", hash_val, key.b, key.w); */
 
-    if (list) {
-        list->score = score;
-    } else {
-        new_node = create_node(key, turn, score, depth);
-        new_node->next = tt->slot[hash_val];
-        tt->slot[hash_val] = new_node;
-    }
+    tt[hash_val].key = key;
+    tt[hash_val].turn = turn;
+    tt[hash_val].score = score;
+    tt[hash_val].depth = depth;
 }
-

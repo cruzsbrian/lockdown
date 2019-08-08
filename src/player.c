@@ -19,6 +19,7 @@ void player_init(int c) {
     board = create_board();
     board->b = 0L;
     board->w = 0L;
+    board->hash = 0L;
     add_piece(board, 27, WHITE);
     add_piece(board, 28, BLACK);
     add_piece(board, 35, BLACK);

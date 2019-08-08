@@ -10,7 +10,7 @@
 typedef struct {
     uint64_t b;
     uint64_t w;
-    uint16_t hash;
+    uint32_t hash : 24;
 } board_t;
 
 

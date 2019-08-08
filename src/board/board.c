@@ -4,7 +4,7 @@
 #include "board.h"
 
 
-uint16_t hash_vals[2][64];
+uint32_t hash_vals[2][64];
 
 
 /**

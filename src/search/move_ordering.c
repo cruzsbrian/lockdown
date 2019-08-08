@@ -20,7 +20,7 @@ int compare_moves(const void *m1, const void *m2);
  * and sorts them. The resulting array is at *move_arr. The number of moves is
  * put into *n. *move_arr must be freed later.
  */
-void get_scored_moves(move_score_t **move_arr, size_t *n, board_t *board, int c, trans_table_t *tt) {
+void get_scored_moves(move_score_t **move_arr, size_t *n, board_t *board, int c, node_t *tt, long *n_nodes) {
     int ii, move;
     board_t old;
     uint64_t moves_mask = get_moves(board, c);
@@ -57,9 +57,12 @@ void get_scored_moves(move_score_t **move_arr, size_t *n, board_t *board, int c,
         /* Apply the move, score it, and put that in the array element. */
         do_move(board, move, c);
 
-        found = lookup_score(tt, *board, c, &score, &prev_depth);
-        if (!found) score = 0;
-        (*move_arr)[ii].score = score;
+        /* fprintf(stderr, "\n\tLooking up score for move %d for color %d\n", move, c); */
+        found = lookup_score(tt, *board, !c, &score, &prev_depth);
+        if (!found) {
+            score = alphabeta(board, !c, -FLT_MAX, FLT_MAX, 0, 5, tt, n_nodes, 0).score;
+        }
+        (*move_arr)[ii].score = -score;
 
         /* Restore the old board. */
         *board = old;
