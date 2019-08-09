@@ -38,8 +38,8 @@ void get_scored_moves(move_score_t **move_arr, size_t *n, board_t *board, int c,
     /* Loop through all moves. */
     for (ii = 0; ii < *n; ++ii) {
         int found;
-        char prev_depth;
-        float score;
+        char prev_depth, type;
+        int16_t score;
 
         /*
          * Find next move by counting trailing zeros in the mask, then zero out
@@ -58,9 +58,9 @@ void get_scored_moves(move_score_t **move_arr, size_t *n, board_t *board, int c,
         do_move(board, move, c);
 
         /* fprintf(stderr, "\n\tLooking up score for move %d for color %d\n", move, c); */
-        found = lookup_score(tt, *board, !c, &score, &prev_depth);
+        found = lookup_score(tt, *board, !c, &score, &prev_depth, &type);
         if (!found) {
-            score = alphabeta(board, !c, -FLT_MAX, FLT_MAX, 0, 5, tt, n_nodes, 0).score;
+            score = alphabeta(board, !c, -INT16_MAX, INT16_MAX, 0, 5, tt, n_nodes, 0).score;
         }
         (*move_arr)[ii].score = -score;
 
@@ -74,7 +74,7 @@ void get_scored_moves(move_score_t **move_arr, size_t *n, board_t *board, int c,
 
 /* Comparison function for sorting scored moves. */
 int compare_moves(const void *m1, const void *m2) {
-    float s1 = ((move_score_t *)m1)->score;
-    float s2 = ((move_score_t *)m2)->score;
-    return (int)(s2 - s1);
+    int16_t s1 = ((move_score_t *)m1)->score;
+    int16_t s2 = ((move_score_t *)m2)->score;
+    return s2 - s1;
 }

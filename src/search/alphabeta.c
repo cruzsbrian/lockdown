@@ -4,7 +4,6 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <stddef.h>
-#include <float.h>
 #include "../board/board.h"
 #include "../eval/table_eval.h"
 #include "trans_table.h"
@@ -17,12 +16,12 @@
  * and whether the game finished. Parameter n is used to track total number of
  * nodes visited.
  */
-move_score_t alphabeta(board_t *board, int c, float alpha, float beta,
+move_score_t alphabeta(board_t *board, int c, int16_t alpha, int16_t beta,
                        int depth, int max_depth, node_t *tt, long *n, int use_tt) {
     board_t old;
     uint64_t moves;
     int move;
-    float score;
+    int16_t score;
     move_score_t best_move, result;
 
     /* Increment visited node counter. */

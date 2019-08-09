@@ -37,7 +37,8 @@ void free_trans_table(node_t *tt) {
 }
 
 
-int lookup_score(node_t *tt, board_t key, char turn, float *score, char *depth) {
+int lookup_score(node_t *tt, board_t key, char turn,
+                 int16_t *score, char *depth, char *type) {
     uint32_t hash_val;
     node_t slot;
 
@@ -57,7 +58,7 @@ int lookup_score(node_t *tt, board_t key, char turn, float *score, char *depth) 
     return 0;
 }
 
-void set_score(node_t *tt, board_t key, char turn, float score, char depth) {
+void set_score(node_t *tt, board_t key, char turn, int16_t score, char depth) {
     uint32_t hash_val;
 
     hash_val = hash(key);

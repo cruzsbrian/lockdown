@@ -4,7 +4,7 @@
 #include "../board/board.h"
 
 
-float piece_score(uint64_t pieces);
+int16_t piece_score(uint64_t pieces);
 
 int n_corners(uint64_t pieces);
 int n_edges(uint64_t pieces);
@@ -18,11 +18,11 @@ const uint64_t m_other  = 0x007e7e7e7e7e7e00;
 
 
 /* Weights for different score metrics. */
-const float w_corner     = 20.;
-const float w_edge       = 5.;
-const float w_other      = 0.5;
-const float w_mobility   = 5.;
-const float w_flippable  = 0.5;
+const int16_t w_corner     = 40;
+const int16_t w_edge       = 10;
+const int16_t w_other      = 1;
+const int16_t w_mobility   = 5;
+const int16_t w_flippable  = 1;
 
 
 
@@ -33,12 +33,12 @@ const float w_flippable  = 0.5;
  * number of pieces that can be flipped in the next move. Mobility and flipping
  * are also weighted by the same matrix.
  */
-float table_eval(board_t *b, int c) {
+int16_t table_eval(board_t *b, int c) {
     uint64_t own, opp,
              own_moves, opp_moves,
              own_flip, opp_flip;
 
-    float score = 0;
+    int16_t score = 0;
 
     if (c == BLACK) {
         own = b->b;
@@ -76,12 +76,12 @@ int endgame_eval(board_t *b, int c) {
 /**
  * Find the weighted score for a set of pieces
  */
-float piece_score(uint64_t pieces) {
-    float score = 0;
+int16_t piece_score(uint64_t pieces) {
+    int16_t score = 0;
 
-    score += (float)n_corners(pieces) * w_corner;
-    score += (float)n_edges(pieces) * w_edge;
-    score += (float)n_other(pieces) * w_other;
+    score += (int16_t)n_corners(pieces) * w_corner;
+    score += (int16_t)n_edges(pieces) * w_edge;
+    score += (int16_t)n_other(pieces) * w_other;
 
     return score;
 }

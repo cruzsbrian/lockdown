@@ -13,7 +13,7 @@
 #include "trans_table.h"
 
 
-const int DEPTH = 9;
+const int DEPTH = 10;
 const int ENDGAME_MOVES = 20;
 
 
@@ -67,7 +67,7 @@ int ab_search(board_t *board, int c, int depth, long *n) {
     move_score_t *moves;
     size_t n_moves;
 
-    float best_score, score;
+    int16_t best_score, score;
     int best_move, move;
     move_score_t result;
 
@@ -77,7 +77,7 @@ int ab_search(board_t *board, int c, int depth, long *n) {
     get_scored_moves(&moves, &n_moves, board, c, trans_table, n);
 
     /* Start with minimum score */
-    best_score = -FLT_MAX;
+    best_score = -INT16_MAX;
     best_move = -1;
 
     /* If there are no available moves, return a pass. */
@@ -97,7 +97,7 @@ int ab_search(board_t *board, int c, int depth, long *n) {
          */
         old = *board;
         do_move(board, move, c);
-        result = alphabeta(board, !c, -FLT_MAX, -best_score, 0, depth, trans_table, n, 1);
+        result = alphabeta(board, !c, -INT16_MAX, -best_score, 0, depth, trans_table, n, 1);
         *board = old;
 
         /* Score from alphabeta will be for the opponent. */
@@ -105,7 +105,7 @@ int ab_search(board_t *board, int c, int depth, long *n) {
 
         /* If move leads to guaranteed win, return it. */
         if (result.end && score > 0) {
-            fprintf(stderr, "score %.2f (guaranteed win)\n", score);
+            fprintf(stderr, "score %d (guaranteed win)\n", score);
             return move;
         }
 
@@ -114,7 +114,7 @@ int ab_search(board_t *board, int c, int depth, long *n) {
          * best_move. Otherwise just print newline and go to next.
          */
         if (score > best_score) {
-            fprintf(stderr, "score %.2f\n", score);
+            fprintf(stderr, "score %d\n", score);
 
             best_move = move;
             best_score = score;
@@ -134,7 +134,7 @@ int endgame_search(board_t *board, int c, long *n) {
     board_t old;
     move_score_t *moves;
     size_t n_moves;
-    float best_score, score;
+    int16_t best_score, score;
     int move;
     move_score_t result;
     int ii;
