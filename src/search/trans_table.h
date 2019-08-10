@@ -14,7 +14,7 @@
 /* Node for storing game position and score. */
 typedef struct {
     board_t key;
-    char turn : 1;
+    char color : 1;
     int16_t score;
     char depth;
     char type : 2;
@@ -24,8 +24,7 @@ typedef struct {
 node_t *init_trans_table(void);
 void free_trans_table(node_t *tt);
 
-int lookup_score(node_t *tt, board_t key, char turn,
-                 int16_t *score, char *depth, char *type);
-void set_score(node_t *tt, board_t key, char turn, int16_t score, char depth);
+node_t lookup_score(node_t *tt, board_t key);
+void set_score(node_t *tt, board_t key, char color, int16_t score, char depth, char type);
 
 #endif

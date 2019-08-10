@@ -37,8 +37,7 @@ void get_scored_moves(move_score_t **move_arr, size_t *n, board_t *board, int c,
 
     /* Loop through all moves. */
     for (ii = 0; ii < *n; ++ii) {
-        int found;
-        char prev_depth, type;
+        node_t tt_entry;
         int16_t score;
 
         /*
@@ -58,11 +57,17 @@ void get_scored_moves(move_score_t **move_arr, size_t *n, board_t *board, int c,
         do_move(board, move, c);
 
         /* fprintf(stderr, "\n\tLooking up score for move %d for color %d\n", move, c); */
-        found = lookup_score(tt, *board, !c, &score, &prev_depth, &type);
-        if (!found) {
-            score = alphabeta(board, !c, -INT16_MAX, INT16_MAX, 0, 5, tt, n_nodes, 0).score;
+        tt_entry = lookup_score(tt, *board);
+        if (tt_entry.depth >= 5) {
+            if (tt_entry.color == c) {
+                score = tt_entry.score;
+            } else {
+                score = -tt_entry.score;
+            }
+        } else {
+            score = -alphabeta(board, !c, -INT16_MAX, INT16_MAX, 0, 5, tt, n_nodes, 0).score;
         }
-        (*move_arr)[ii].score = -score;
+        (*move_arr)[ii].score = score;
 
         /* Restore the old board. */
         *board = old;

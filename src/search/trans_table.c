@@ -6,8 +6,8 @@
 
 
 uint32_t hash(board_t key);
-int is_equal(board_t key1, board_t key2, char turn1, char turn2) {
-    return key1.w == key2.w && key1.b == key2.b && turn1 == turn2;
+int is_equal(board_t key1, board_t key2) {
+    return key1.w == key2.w && key1.b == key2.b;
 }
 
 
@@ -24,9 +24,6 @@ node_t *init_trans_table() {
     for (ii = 0; ii < NSLOTS; ++ii) {
         board_t key = { 0L, 0L, 0L };
         tt[ii].key = key;
-        tt[ii].turn = 0;
-        tt[ii].score = 0.;
-        tt[ii].depth = 0;
     }
 
     return tt;
@@ -37,36 +34,30 @@ void free_trans_table(node_t *tt) {
 }
 
 
-int lookup_score(node_t *tt, board_t key, char turn,
-                 int16_t *score, char *depth, char *type) {
+node_t lookup_score(node_t *tt, board_t key) {
     uint32_t hash_val;
-    node_t slot;
+    node_t *slot;
+    node_t ret;
 
     hash_val = hash(key);
+    slot = tt + hash_val;
 
-    /* fprintf(stderr, "\tLooking up trans table @ hash %d\n\t Board %lx %lx\n", hash_val, key.b, key.w); */
-
-    slot = tt[hash_val];
-
-    if (is_equal(slot.key, key, slot.turn, turn)) {
-        /* fprintf(stderr, "\tFound, score %.2f for color %d\n", slot.score, slot.turn); */
-        *score = slot.score;
-        *depth = slot.depth;
-        return 1;
+    if (is_equal(slot->key, key)) {
+        return *slot;
     }
 
-    return 0;
+    ret = *slot;
+    ret.depth = 0;
+    return ret;
 }
 
-void set_score(node_t *tt, board_t key, char turn, int16_t score, char depth) {
+void set_score(node_t *tt, board_t key, char color, int16_t score, char depth, char type) {
     uint32_t hash_val;
+    node_t *slot;
+    node_t new = { key, color, score, depth, type };
 
     hash_val = hash(key);
+    slot = tt + hash_val;
 
-    /* fprintf(stderr, "\tSetting trans table @ hash %d\n\t Board %lx %lx\n", hash_val, key.b, key.w); */
-
-    tt[hash_val].key = key;
-    tt[hash_val].turn = turn;
-    tt[hash_val].score = score;
-    tt[hash_val].depth = depth;
+    *slot = new;
 }

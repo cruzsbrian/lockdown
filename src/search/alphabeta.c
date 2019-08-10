@@ -74,8 +74,7 @@ move_score_t alphabeta(board_t *board, int c, int16_t alpha, int16_t beta,
         score = -result.score;
 
         if (depth == 1 && use_tt) {
-            /* fprintf(stderr, "\tSetting trans table for move %d for color %d\n", move, c); */
-            set_score(tt, *board, !c, result.score, max_depth - depth);
+            set_score(tt, *board, !c, result.score, max_depth - depth, NODE_EXACT);
         }
 
         /* Undo move. */
