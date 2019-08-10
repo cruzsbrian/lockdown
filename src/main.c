@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 
 #include "player.h"
 
@@ -15,6 +16,7 @@ void print_move(int move);
  */
 int main(int argc, char *argv[]) {
     int bot_color, opp_move, bot_move, ms_left;
+    clock_t start;
 
     /* Get bot color from args. */
     /* Check that bot color arg was given. */
@@ -35,8 +37,14 @@ int main(int argc, char *argv[]) {
     printf("Init done \n");
     fflush(stdout);
 
+    start = clock();
+
     /* Game loop. */
     while (read_move(&opp_move, &ms_left)) {
+        if (ms_left == -1) {
+            ms_left = 240000 - (clock() - start) / (CLOCKS_PER_SEC / 1000);
+        }
+
         /* Print blank lines before/after our debug messages. */
         fprintf(stderr, "\n");
         bot_move = next_move(opp_move, ms_left);

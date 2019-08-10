@@ -15,6 +15,6 @@ void search_init(void);
 void search_free(void);
 
 /* Search game tree for best move for color c. */
-int search(board_t *board, int c, int move_num);
+int search(board_t *board, int c, int move_num, float time_left);
 
 #endif

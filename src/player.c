@@ -42,13 +42,15 @@ void player_free(void) {
  * move in response.
  */
 int next_move(int opp_move, int ms_left) {
+    float seconds_left;
     int bot_move;
 
     /* Apply opponent's move. */
     do_move(board, opp_move, !bot_color);
 
     /* Get bot's move. */
-    bot_move = search(board, bot_color, move_num);
+    seconds_left = (float)ms_left / 1000.;
+    bot_move = search(board, bot_color, move_num, seconds_left);
 
     /* Apply bot's move. */
     do_move(board, bot_move, bot_color);

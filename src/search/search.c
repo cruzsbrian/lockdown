@@ -14,11 +14,15 @@
 
 
 const int DEPTH = 10;
-const int ENDGAME_MOVES = 20;
+const int ENDGAME_MOVES = 18;
 
 
-int ab_search(board_t *board, int c, int depth, long *n);
+int iter_ab_search(board_t *board, int c, int step, float max_time, long *n);
+move_score_t ab_search(board_t *board, int c, int depth, long *n);
+
 int endgame_search(board_t *board, int c, long *n);
+
+float get_time_budget(int move_num, float time_left);
 
 
 node_t *trans_table;
@@ -34,11 +38,14 @@ void search_free() {
 }
 
 
-int search(board_t *board, int c, int move_num) {
+int search(board_t *board, int c, int move_num, float time_left) {
     int result;
     long n_nodes = 0L;
     clock_t start, end;
-    float seconds, nps;
+    float time_budget, seconds, nps;
+
+    fprintf(stderr, "%.2f seconds left\n", time_left);
+    time_budget = get_time_budget(move_num, time_left);
 
     start = clock();
 
@@ -46,8 +53,9 @@ int search(board_t *board, int c, int move_num) {
         fprintf(stderr, "Running end-game solver.\n");
         result = endgame_search(board, c, &n_nodes);
     } else {
-        fprintf(stderr, "Running alphabeta search.\n");
-        result = ab_search(board, c, DEPTH, &n_nodes);
+        fprintf(stderr, "Running alphabeta search with %.2f seconds.\n",
+                time_budget);
+        result = iter_ab_search(board, c, 1, time_budget, &n_nodes);
     }
 
     end = clock();
@@ -62,14 +70,50 @@ int search(board_t *board, int c, int move_num) {
 }
 
 
-int ab_search(board_t *board, int c, int depth, long *n) {
+int iter_ab_search(board_t *board, int c, int step, float max_time, long *n) {
+    int depth;
+    move_score_t best_move;
+    float last_time, total_time, time_factor;
+
+    best_move.pos = -1;
+    last_time = 0.;
+    total_time = 0.;
+    time_factor = 4;   /* Initial guess based on previous games. */
+    depth = 1;
+
+    while (total_time + last_time * time_factor <= max_time) {
+        clock_t start, end;
+        float seconds;
+        start = clock();
+
+        best_move = ab_search(board, c, depth, n);
+
+        end = clock();
+        seconds = (float)(end - start) / CLOCKS_PER_SEC;
+
+        if (depth > 7) {
+            time_factor = (time_factor + (seconds / last_time)) / 2;
+        }
+        last_time = seconds;
+
+        fprintf(stderr, "Depth %2d best move %2d (score %3d, time %.2e)\n",
+                depth, best_move.pos, best_move.score, seconds);
+
+        depth++;
+    }
+
+    return best_move.pos;
+}
+
+
+move_score_t ab_search(board_t *board, int c, int depth, long *n) {
     board_t old;
     move_score_t *moves;
     size_t n_moves;
 
-    int16_t best_score, score;
-    int best_move, move;
-    move_score_t result;
+    int16_t score;
+    int move;
+    move_score_t best_move, result;
 
     int ii;
 
@@ -77,19 +121,19 @@ int ab_search(board_t *board, int c, int depth, long *n) {
     get_scored_moves(&moves, &n_moves, board, c, trans_table, n);
 
     /* Start with minimum score */
-    best_score = -INT16_MAX;
-    best_move = -1;
+    best_move.score = -INT16_MAX;
+    best_move.pos = -1;
 
     /* If there are no available moves, return a pass. */
     if (n_moves == 0) {
-        return -1;
+        return best_move;
     }
 
     /* Search each move. */
     for (ii = 0; ii < n_moves; ++ii) {
         move = moves[ii].pos;
 
-        fprintf(stderr, "Scanning move %2d ... ", move);
+        /* fprintf(stderr, "Scanning move %2d ... ", move); */
 
         /*
          * Store old board, apply the move, evaluate with alphabeta, then revert
@@ -97,29 +141,23 @@ int ab_search(board_t *board, int c, int depth, long *n) {
          */
         old = *board;
         do_move(board, move, c);
-        result = alphabeta(board, !c, -INT16_MAX, -best_score, 0, depth, trans_table, n, 1);
+        result = alphabeta(board, !c, -INT16_MAX, -best_move.score, 0, depth, trans_table, n, 1);
         *board = old;
 
         /* Score from alphabeta will be for the opponent. */
         score = -result.score;
 
-        /* If move leads to guaranteed win, return it. */
-        if (result.end && score > 0) {
-            fprintf(stderr, "score %d (guaranteed win)\n", score);
-            return move;
-        }
-
         /*
          * If this move is the best one found yet, print score and update
          * best_move. Otherwise just print newline and go to next.
          */
-        if (score > best_score) {
-            fprintf(stderr, "score %d\n", score);
+        if (score > best_move.score) {
+            /* fprintf(stderr, "score %d\n", score); */
 
-            best_move = move;
-            best_score = score;
+            best_move.pos = move;
+            best_move.score = score;
         } else {
-            fprintf(stderr, "\n");
+            /* fprintf(stderr, "\n"); */
         }
     }
 
@@ -178,4 +216,29 @@ int endgame_search(board_t *board, int c, long *n) {
     }
 
     return move;
+}
+
+
+float get_time_budget(int move_num, float time_left) {
+    int moves_left;
+    float avg_move_time;
+
+    /* Save 40s for the endgame solver. */
+    time_left -= 40;
+
+    /*
+     * Find moves the bot has left to play, not including endgame moves. Note
+     * that move_num counts bot's moves and opponent's moves.
+     */
+    moves_left = (60 - ENDGAME_MOVES - move_num) / 2 + 1;
+
+    avg_move_time = time_left / (float)moves_left;
+
+    if (move_num < 15) {
+        return avg_move_time * 0.5;
+    } else if (move_num < 30) {
+        return avg_move_time * 1.5;
+    } else {
+        return avg_move_time;
+    }
 }
