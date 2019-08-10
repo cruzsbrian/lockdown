@@ -15,7 +15,7 @@ uint32_t hash_vals[2][64];
 
 board_t *create_board(void) {
     board_t *new_board = (board_t *)malloc(sizeof(board_t));
-    
+
     if (new_board == NULL) {
         fprintf(stderr, "Error: Unable to allocate new board.");
         exit(1);
@@ -87,7 +87,7 @@ const uint64_t notHFile = 0x7f7f7f7f7f7f7f7f;
 /*
  * Fill algorithms:
  * Smears the gen bitmap in the specified direction as long as there is
- * something in the pro bitmap. For east, west, and diagonals, we exclude the 
+ * something in the pro bitmap. For east, west, and diagonals, we exclude the
  * first file in that shift direction to avoid wrap-around.
  *
  * The result takes each piece in gen, and draws a ray from it in the specified
@@ -223,52 +223,55 @@ uint64_t get_moves(board_t *board, int c) {
 }
 
 
-void get_moves_flips(uint64_t *moves, uint64_t *flips, board_t *board, int c) {	
-    uint64_t gen, pro, empty, tmp;	
+void get_moves_flips(uint64_t *moves, uint64_t *flips, board_t *board, int c) {
+    uint64_t gen, pro, empty, tmp, m, f;
 
-     if (c == BLACK) {	
-        gen = board->b;	
-        pro = board->w;	
-    } else {	
-        gen = board->w;	
-        pro = board->b;	
-    }	
+    if (c == BLACK) {
+        gen = board->b;
+        pro = board->w;
+    } else {
+        gen = board->w;
+        pro = board->b;
+    }
 
-     *moves = 0L;	
-    *flips = 0L;	
-    empty = ~(gen | pro);	
+    m = 0L;
+    f = 0L;
+    empty = ~(gen | pro);
 
-     tmp = soutOccl(gen, pro) & pro;	
-    if ((tmp >> 8) & empty) *flips |= tmp;	
-    *moves |= (tmp >> 8) & empty;	
+    tmp = soutOccl(gen, pro) & pro;
+    if ((tmp >> 8) & empty) f |= tmp;
+    m |= (tmp >> 8) & empty;
 
-     tmp = nortOccl(gen, pro) & pro;	
-    if ((tmp << 8) & empty) *flips |= tmp;	
-    *moves |= (tmp << 8) & empty;	
+    tmp = nortOccl(gen, pro) & pro;
+    if ((tmp << 8) & empty) f |= tmp;
+    m |= (tmp << 8) & empty;
 
-     tmp = eastOccl(gen, pro) & pro;	
-    if ((tmp << 1) & notAFile & empty) *flips |= tmp;	
-    *moves |= (tmp << 1) & notAFile & empty;	
+    tmp = eastOccl(gen, pro) & pro;
+    if ((tmp << 1) & notAFile & empty) f |= tmp;
+    m |= (tmp << 1) & notAFile & empty;
 
-     tmp = westOccl(gen, pro) & pro;	
-    if ((tmp >> 1) & notHFile & empty) *flips |= tmp;	
-    *moves |= (tmp >> 1) & notHFile & empty;	
+    tmp = westOccl(gen, pro) & pro;
+    if ((tmp >> 1) & notHFile & empty) f |= tmp;
+    m |= (tmp >> 1) & notHFile & empty;
 
-     tmp = noEaOccl(gen, pro) & pro;	
-    if ((tmp << 9) & notAFile & empty) *flips |= tmp;	
-    *moves |= (tmp << 9) & notAFile & empty;	
+    tmp = noEaOccl(gen, pro) & pro;
+    if ((tmp << 9) & notAFile & empty) f |= tmp;
+    m |= (tmp << 9) & notAFile & empty;
 
-     tmp = soEaOccl(gen, pro) & pro;	
-    if ((tmp >> 7) & notAFile & empty) *flips |= tmp;	
-    *moves |= (tmp >> 7) & notAFile & empty;	
+    tmp = soEaOccl(gen, pro) & pro;
+    if ((tmp >> 7) & notAFile & empty) f |= tmp;
+    m |= (tmp >> 7) & notAFile & empty;
 
-     tmp = noWeOccl(gen, pro) & pro;	
-    if ((tmp << 7) & notHFile & empty) *flips |= tmp;	
-    *moves |= (tmp << 7) & notHFile & empty;	
+    tmp = noWeOccl(gen, pro) & pro;
+    if ((tmp << 7) & notHFile & empty) f |= tmp;
+    m |= (tmp << 7) & notHFile & empty;
 
-     tmp = soWeOccl(gen, pro) & pro;	
-    if ((tmp >> 9) & notHFile & empty) *flips |= tmp;	
-    *moves |= (tmp >> 9) & notHFile & empty;	
+    tmp = soWeOccl(gen, pro) & pro;
+    if ((tmp >> 9) & notHFile & empty) f |= tmp;
+    m |= (tmp >> 9) & notHFile & empty;
+
+    *moves = m;
+    *flips = f;
 }
 
 
@@ -303,7 +306,7 @@ void do_move(board_t *board, int pos, int c) {
 
         board->w |= gen;
     }
-    
+
     diff = 0L;
     diff |= soutOccl(gen, pro) & nortOccl(own, pro);
     diff |= nortOccl(gen, pro) & soutOccl(own, pro);

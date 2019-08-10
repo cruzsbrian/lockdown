@@ -1,5 +1,5 @@
 CC     = gcc
-CFLAGS = -mbmi2 -Wall -Wstrict-prototypes -ansi -pedantic -Ofast
+CFLAGS = -mbmi2 -Wall -Wstrict-prototypes -ansi -pedantic -flto -Ofast
 LDFLAGS = -Ofast
 
 SRCDIR = src

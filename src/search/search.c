@@ -13,7 +13,6 @@
 #include "trans_table.h"
 
 
-const int DEPTH = 10;
 const int ENDGAME_MOVES = 18;
 
 
@@ -96,6 +95,8 @@ int iter_ab_search(board_t *board, int c, int step, float max_time, long *n) {
         }
         last_time = seconds;
 
+        if (best_move.end) break;
+
         fprintf(stderr, "Depth %2d best move %2d (score %3d, time %.2e)\n",
                 depth, best_move.pos, best_move.score, seconds);
 
@@ -152,12 +153,9 @@ move_score_t ab_search(board_t *board, int c, int depth, long *n) {
          * best_move. Otherwise just print newline and go to next.
          */
         if (score > best_move.score) {
-            /* fprintf(stderr, "score %d\n", score); */
-
             best_move.pos = move;
             best_move.score = score;
-        } else {
-            /* fprintf(stderr, "\n"); */
+            best_move.end = result.end;
         }
     }
 
@@ -221,7 +219,7 @@ int endgame_search(board_t *board, int c, long *n) {
 
 float get_time_budget(int move_num, float time_left) {
     int moves_left;
-    float avg_move_time;
+    float avg_move_time, result;
 
     /* Save 40s for the endgame solver. */
     time_left -= 40;
@@ -235,10 +233,13 @@ float get_time_budget(int move_num, float time_left) {
     avg_move_time = time_left / (float)moves_left;
 
     if (move_num < 15) {
-        return avg_move_time * 0.5;
+        result = avg_move_time * 0.5;
     } else if (move_num < 30) {
-        return avg_move_time * 1.5;
+        result = avg_move_time * 1.5;
     } else {
-        return avg_move_time;
+        result = avg_move_time;
     }
+
+    if (result < 0.5) return 0.5;
+    return result;
 }
