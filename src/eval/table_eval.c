@@ -18,10 +18,10 @@ const uint64_t m_other  = 0x007e7e7e7e7e7e00;
 
 
 /* Weights for different score metrics. */
-const int16_t w_corner     = 40;
+const int16_t w_corner     = 42;
 const int16_t w_edge       = 10;
 const int16_t w_other      = 1;
-const int16_t w_mobility   = 5;
+const int16_t w_mobility   = 4;
 const int16_t w_flippable  = 1;
 
 

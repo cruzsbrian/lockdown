@@ -2,12 +2,13 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
+#include <stdint.h>
 
 #include "player.h"
 
 
 int read_move(int *move, int *ms_left);
-void print_move(int move);
+void print_move(uint8_t move);
 
 
 /**
@@ -81,7 +82,7 @@ int read_move(int *move, int *ms_left) {
  * Print move: takes a move as a 0-63 index and prints it in "x y" format to
  * stdout.
  */
-void print_move(int move) {
+void print_move(uint8_t move) {
     int x, y;
 
     if (move == -1) {

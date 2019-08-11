@@ -20,7 +20,8 @@ int compare_moves(const void *m1, const void *m2);
  * and sorts them. The resulting array is at *move_arr. The number of moves is
  * put into *n. *move_arr must be freed later.
  */
-void get_scored_moves(move_score_t **move_arr, size_t *n, board_t *board, int c, node_t *tt, long *n_nodes) {
+void get_scored_moves(move_score_t **move_arr, size_t *n, board_t *board, int c,
+                      int depth, node_t *tt, long *n_nodes) {
     int ii, move;
     board_t old;
     uint64_t moves_mask = get_moves(board, c);
@@ -58,14 +59,14 @@ void get_scored_moves(move_score_t **move_arr, size_t *n, board_t *board, int c,
 
         /* fprintf(stderr, "\n\tLooking up score for move %d for color %d\n", move, c); */
         tt_entry = lookup_score(tt, *board);
-        if (tt_entry.depth >= 5) {
+        if (tt_entry.depth >= depth) {
             if (tt_entry.color == c) {
                 score = tt_entry.score;
             } else {
                 score = -tt_entry.score;
             }
         } else {
-            score = -alphabeta(board, !c, -INT16_MAX, INT16_MAX, 0, 5, tt, n_nodes, 0).score;
+            score = -alphabeta(board, !c, -INT16_MAX, INT16_MAX, 0, depth, tt, n_nodes, 0).score;
         }
         (*move_arr)[ii].score = score;
 

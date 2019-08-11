@@ -13,7 +13,7 @@
 #include "trans_table.h"
 
 
-const int ENDGAME_MOVES = 18;
+const int ENDGAME_MOVES = 19;
 
 
 int iter_ab_search(board_t *board, int c, int step, float max_time, long *n);
@@ -113,13 +113,13 @@ move_score_t ab_search(board_t *board, int c, int depth, long *n) {
     size_t n_moves;
 
     int16_t score;
-    int move;
+    uint8_t move;
     move_score_t best_move, result;
 
     int ii;
 
     /* Get available moves, sorted by eval score. */
-    get_scored_moves(&moves, &n_moves, board, c, trans_table, n);
+    get_scored_moves(&moves, &n_moves, board, c, 5, trans_table, n);
 
     /* Start with minimum score */
     best_move.score = -INT16_MAX;
@@ -171,12 +171,12 @@ int endgame_search(board_t *board, int c, long *n) {
     move_score_t *moves;
     size_t n_moves;
     int16_t best_score, score;
-    int move;
+    uint8_t move;
     move_score_t result;
     int ii;
 
     /* Get available moves, sorted by eval score. */
-    get_scored_moves(&moves, &n_moves, board, c, trans_table, n);
+    get_scored_moves(&moves, &n_moves, board, c, 5, trans_table, n);
 
     best_score = -1;
 
@@ -213,7 +213,7 @@ int endgame_search(board_t *board, int c, long *n) {
         }
     }
 
-    return move;
+    return moves[0].pos;
 }
 
 
@@ -231,14 +231,7 @@ float get_time_budget(int move_num, float time_left) {
     moves_left = (60 - ENDGAME_MOVES - move_num) / 2 + 1;
 
     avg_move_time = time_left / (float)moves_left;
-
-    if (move_num < 15) {
-        result = avg_move_time * 0.5;
-    } else if (move_num < 30) {
-        result = avg_move_time * 1.5;
-    } else {
-        result = avg_move_time;
-    }
+    result = avg_move_time * 1.25;
 
     if (result < 0.5) return 0.5;
     return result;

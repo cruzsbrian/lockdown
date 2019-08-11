@@ -6,9 +6,9 @@
 
 /* Struct so that searches can return both a move and its score. */
 typedef struct {
-    int pos; /* squared piece was placed */
-    int16_t score; /* minimax score */
-    int end; /* if leads to endgame */
+    uint8_t pos;
+    int16_t score;
+    uint8_t end; /* if move was searched to end game */
 } move_score_t;
 
 void search_init(void);
