@@ -31,6 +31,7 @@ int popcount_board(board_t *board);
 /* Move generation and make-move */
 uint64_t get_moves(board_t *board, int c);
 void get_moves_flips(uint64_t *moves, uint64_t *flips, board_t *board, int c);
+int get_frontier(board_t *board_t, int c);
 
 void do_move(board_t *board, int pos, int c);
 

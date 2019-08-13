@@ -7,22 +7,25 @@
 int16_t piece_score(uint64_t pieces);
 
 int n_corners(uint64_t pieces);
+int x_square(uint64_t pieces);
 int n_edges(uint64_t pieces);
 int n_other(uint64_t pieces);
 
 
 /* Masks for getting sets of pieces. */
 const uint64_t m_corner = 0x8100000000000081;
-const uint64_t m_edge   = 0x7e8181818181817e;
-const uint64_t m_other  = 0x007e7e7e7e7e7e00;
+const uint64_t m_edge   = 0x3c7e818181817e3c;
+const uint64_t m_other  = 0x003c7e7e7e7e3c00;
 
 
 /* Weights for different score metrics. */
-const int16_t w_corner     = 42;
-const int16_t w_edge       = 10;
-const int16_t w_other      = 1;
-const int16_t w_mobility   = 4;
+const int16_t w_corner     = 50;
+const int16_t w_edge       = 12;
+const int16_t w_other      = 0;
+const int16_t w_mobility   = 20;
 const int16_t w_flippable  = 1;
+const int16_t w_frontier   = -12;
+const int16_t w_x_square   = -40;
 
 
 
@@ -52,8 +55,10 @@ int16_t table_eval(board_t *b, int c) {
     get_moves_flips(&opp_moves, &opp_flip, b, !c);
 
     score += piece_score(own) - piece_score(opp);
-    score += (piece_score(own_moves) - piece_score(opp_moves)) * w_mobility;
+    score += (popcount(own_moves) - popcount(opp_moves)) * w_mobility;
     score += (piece_score(own_flip) - piece_score(opp_flip)) * w_flippable;
+    score += (get_frontier(b, c) - get_frontier(b, !c)) * w_frontier;
+    score += (x_square(own) - x_square(opp)) * w_x_square;
 
     return score;
 }
@@ -81,7 +86,7 @@ int16_t piece_score(uint64_t pieces) {
 
     score += (int16_t)n_corners(pieces) * w_corner;
     score += (int16_t)n_edges(pieces) * w_edge;
-    score += (int16_t)n_other(pieces) * w_other;
+    /* score += (int16_t)n_other(pieces) * w_other; */
 
     return score;
 }
@@ -99,6 +104,17 @@ int n_corners(uint64_t pieces) {
     if (pieces & 0x0100000000000000) result++;
     if (pieces & 0x0000000000000080) result++;
     if (pieces & 0x0000000000000001) result++;
+
+    return result;
+}
+
+int x_square(uint64_t pieces) {
+    int result = 0;
+
+    if (pieces & 0x0040000000000000 && !(pieces & 0x8000000000000000)) result++;
+    if (pieces & 0x0002000000000000 && !(pieces & 0x0100000000000000)) result++;
+    if (pieces & 0x0000000000004000 && !(pieces & 0x0000000000000080)) result++;
+    if (pieces & 0x0000000000000200 && !(pieces & 0x0000000000000001)) result++;
 
     return result;
 }

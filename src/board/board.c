@@ -274,6 +274,32 @@ void get_moves_flips(uint64_t *moves, uint64_t *flips, board_t *board, int c) {
     *flips = f;
 }
 
+int get_frontier(board_t *board, int c) {
+    uint64_t own, opp, empty, frontier;
+
+    if (c == BLACK) {
+        own = board->b;
+        opp = board->w;
+    } else {
+        own = board->w;
+        opp = board->b;
+    }
+
+    empty = ~(own | opp);
+    frontier = 0L;
+
+    frontier |= (own >> 8) & empty;
+    frontier |= (own << 8) & empty;
+    frontier |= (own << 1) & notAFile & empty;
+    frontier |= (own >> 1) & notHFile & empty;
+    frontier |= (own << 9) & notAFile & empty;
+    frontier |= (own >> 7) & notAFile & empty;
+    frontier |= (own << 7) & notHFile & empty;
+    frontier |= (own >> 9) & notHFile & empty;
+
+    return popcount(frontier);
+}
+
 
 
 

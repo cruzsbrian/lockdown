@@ -2,6 +2,7 @@
 #include <stdlib.h>
 
 #include "search/search.h"
+#include "eval/table_eval.h"
 
 
 board_t *board;
