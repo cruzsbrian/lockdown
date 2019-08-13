@@ -13,7 +13,7 @@
 #include "trans_table.h"
 
 
-const int ENDGAME_MOVES = 19;
+const int ENDGAME_MOVES = 18;
 
 
 int iter_ab_search(board_t *board, int c, int step, float max_time, long *n);
@@ -113,7 +113,7 @@ move_score_t ab_search(board_t *board, int c, int depth, long *n) {
     size_t n_moves;
 
     int16_t score;
-    uint8_t move;
+    int8_t move;
     move_score_t best_move, result;
 
     int ii;
@@ -171,7 +171,7 @@ int endgame_search(board_t *board, int c, long *n) {
     move_score_t *moves;
     size_t n_moves;
     int16_t best_score, score;
-    uint8_t move;
+    int8_t move;
     move_score_t result;
     int ii;
 
@@ -221,6 +221,11 @@ float get_time_budget(int move_num, float time_left) {
     int moves_left;
     float avg_move_time, result;
 
+    /* The first move for black doesn't matter. */
+    if (move_num == 0) {
+        return 0.01;
+    }
+
     /* Save 40s for the endgame solver. */
     time_left -= 40;
 
@@ -231,7 +236,7 @@ float get_time_budget(int move_num, float time_left) {
     moves_left = (60 - ENDGAME_MOVES - move_num) / 2 + 1;
 
     avg_move_time = time_left / (float)moves_left;
-    result = avg_move_time * 1.25;
+    result = avg_move_time * 1.3;
 
     if (result < 0.5) return 0.5;
     return result;

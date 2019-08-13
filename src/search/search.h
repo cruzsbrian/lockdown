@@ -6,8 +6,8 @@
 
 /* Struct so that searches can return both a move and its score. */
 typedef struct {
-    uint8_t pos;
     int16_t score;
+    int8_t pos;
     uint8_t end; /* if move was searched to end game */
 } move_score_t;
 
