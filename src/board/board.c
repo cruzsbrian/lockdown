@@ -223,6 +223,11 @@ uint64_t get_moves(board_t *board, int c) {
 }
 
 
+/**
+ * Get moves and flips:
+ * Calculate available moves as above, but also keep track of which pieces are
+ * flipped by the move. Stores both values in *moves and *flips.
+ */
 void get_moves_flips(uint64_t *moves, uint64_t *flips, board_t *board, int c) {
     uint64_t gen, pro, empty, tmp, m, f;
 
@@ -274,6 +279,12 @@ void get_moves_flips(uint64_t *moves, uint64_t *flips, board_t *board, int c) {
     *flips = f;
 }
 
+/**
+ * Get frontier pieces:
+ * Gives the number of pieces of color c that are adjacent to empty squares.
+ * Takes the pieces of color c, and shifts in every direction, &-ing with empty
+ * pieces.
+ */
 int get_frontier(board_t *board, int c) {
     uint64_t own, opp, empty, frontier;
 

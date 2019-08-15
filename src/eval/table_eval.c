@@ -19,22 +19,20 @@ const uint64_t m_other  = 0x003c7e7e7e7e3c00;
 
 
 /* Weights for different score metrics. */
-const int16_t w_corner     = 50;
-const int16_t w_edge       = 12;
-const int16_t w_other      = 0;
-const int16_t w_mobility   = 20;
+const int16_t w_corner     = 55;
+const int16_t w_edge       = 10;
+const int16_t w_mobility   = 17;
 const int16_t w_flippable  = 1;
-const int16_t w_frontier   = -12;
-const int16_t w_x_square   = -40;
+const int16_t w_frontier   = -15;
+const int16_t w_x_square   = -45;
 
 
 
 
 /**
  * Table-based eval:
- * Calculates score for the board based on a piece-score matrix, mobility, and
- * number of pieces that can be flipped in the next move. Mobility and flipping
- * are also weighted by the same matrix.
+ * Calculates score for the board based on material, mobility, number of pieces
+ * that can be flipped in the next move, fontier pieces, and x-square pieces.
  */
 int16_t table_eval(board_t *b, int c) {
     uint64_t own, opp,
@@ -56,7 +54,7 @@ int16_t table_eval(board_t *b, int c) {
 
     score += piece_score(own) - piece_score(opp);
     score += (popcount(own_moves) - popcount(opp_moves)) * w_mobility;
-    score += (piece_score(own_flip) - piece_score(opp_flip)) * w_flippable;
+    score += (popcount(own_flip) - popcount(opp_flip)) * w_flippable;
     score += (get_frontier(b, c) - get_frontier(b, !c)) * w_frontier;
     score += (x_square(own) - x_square(opp)) * w_x_square;
 
@@ -86,7 +84,6 @@ int16_t piece_score(uint64_t pieces) {
 
     score += (int16_t)n_corners(pieces) * w_corner;
     score += (int16_t)n_edges(pieces) * w_edge;
-    /* score += (int16_t)n_other(pieces) * w_other; */
 
     return score;
 }
