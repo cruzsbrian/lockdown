@@ -48,6 +48,7 @@ int main(int argc, char *argv[]) {
 
         /* Print blank lines before/after our debug messages. */
         fprintf(stderr, "\n");
+        fprintf(stderr, "lockdown %s\n", (bot_color ? "white" : "black"));
         bot_move = next_move(opp_move, ms_left);
         fprintf(stderr, "\n");
 
