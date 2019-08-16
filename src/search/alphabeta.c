@@ -29,6 +29,7 @@ move_score_t alphabeta(board_t *board, int c, int16_t alpha, int16_t beta,
 
     /* Initialize best move to pass, did not reach end of game. */
     best_move.pos = -1;
+    best_move.score = -INT16_MAX;
     best_move.end = 0;
 
     /* If depth reached, evaluate and return. */
@@ -85,8 +86,12 @@ move_score_t alphabeta(board_t *board, int c, int16_t alpha, int16_t beta,
          * reached, so we can stop searching it.
          */
         if (score >= beta) {
-            best_move.score = beta;
+            best_move.score = score;
             return best_move;
+        }
+
+        if (score > best_move.score) {
+            best_move.score = score;
         }
 
         /* If score is above alpha, record it as best and set alpha to score. */
@@ -96,6 +101,5 @@ move_score_t alphabeta(board_t *board, int c, int16_t alpha, int16_t beta,
         }
     }
 
-    best_move.score = alpha;
     return best_move;
 }
