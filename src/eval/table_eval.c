@@ -2,7 +2,6 @@
 
 #include <stdint.h>
 #include "../board/board.h"
-#include "weights.h"
 
 
 int16_t piece_score(uint64_t pieces);
@@ -17,6 +16,15 @@ int n_other(uint64_t pieces);
 const uint64_t m_corner = 0x8100000000000081;
 const uint64_t m_edge   = 0x3c7e818181817e3c;
 const uint64_t m_other  = 0x003c7e7e7e7e3c00;
+
+
+/* Weights for different score metrics. */
+const int16_t w_corner     = 55;
+const int16_t w_edge       = 10;
+const int16_t w_mobility   = 17;
+const int16_t w_flippable  = 1;
+const int16_t w_frontier   = -15;
+const int16_t w_x_square   = -45;
 
 
 
