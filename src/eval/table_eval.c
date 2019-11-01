@@ -22,8 +22,8 @@ const uint64_t m_other  = 0x003c7e7e7e7e3c00;
 const int16_t w_corner     = 55;
 const int16_t w_edge       = 10;
 const int16_t w_mobility   = 17;
-const int16_t w_flippable  = 1;
-const int16_t w_frontier   = -15;
+const int16_t w_flippable  = 3;
+const int16_t w_frontier   = -20;
 const int16_t w_x_square   = -45;
 
 

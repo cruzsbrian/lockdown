@@ -19,7 +19,7 @@ const float EARLY_MOVE_BIAS = 1.3;
 const float MIN_SEARCH_TIME = 1.;
 
 
-int iter_ab_search(board_t *board, int c, int step, float max_time, long *n);
+int iter_ab_search(board_t *board, int c, int step, int max_depth, float max_time, long *n);
 move_score_t ab_search(board_t *board, int c, int depth, long *n);
 
 int endgame_search(board_t *board, int c, long *n);
@@ -62,7 +62,7 @@ int search(board_t *board, int c, int move_num, float time_left) {
     } else {
         fprintf(stderr, "Running alphabeta search with %.2f seconds.\n",
                 time_budget);
-        result = iter_ab_search(board, c, 1, time_budget, &n_nodes);
+        result = iter_ab_search(board, c, 1, 60 - move_num, time_budget, &n_nodes);
     }
 
     end = clock();
@@ -85,7 +85,7 @@ int search(board_t *board, int c, int move_num, float time_left) {
  * searches. If the time already taken plus the estimated time is more than
  * max_time, exit the loop and return the result from the latest search.
  */
-int iter_ab_search(board_t *board, int c, int step, float max_time, long *n) {
+int iter_ab_search(board_t *board, int c, int step, int max_depth, float max_time, long *n) {
     int depth;
     move_score_t best_move;
     float last_time, total_time, time_factor;
@@ -96,7 +96,7 @@ int iter_ab_search(board_t *board, int c, int step, float max_time, long *n) {
     time_factor = 4;   /* Initial guess based on previous games. */
     depth = 1;
 
-    while (total_time + last_time * time_factor <= max_time) {
+    while (total_time + last_time * time_factor <= max_time && depth <= max_depth) {
         clock_t start, end;
         float seconds;
         start = clock();
