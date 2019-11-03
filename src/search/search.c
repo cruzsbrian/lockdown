@@ -14,9 +14,9 @@
 
 
 const int ENDGAME_MOVES = 18;
-const float ENDGAME_TIME = 40.;
+const float ENDGAME_TIME = 10.;
 const float EARLY_MOVE_BIAS = 1.3;
-const float MIN_SEARCH_TIME = 1.;
+const float MIN_SEARCH_TIME = 0.1;
 
 
 int iter_ab_search(board_t *board, int c, int step, int max_depth, float max_time, long *n);
