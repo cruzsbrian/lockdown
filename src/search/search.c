@@ -8,6 +8,7 @@
 #include <float.h>
 #include "../board/board.h"
 #include "../eval/table_eval.h"
+#include "../opening/opening.h"
 #include "alphabeta.h"
 #include "move_ordering.h"
 #include "trans_table.h"
@@ -28,15 +29,20 @@ float get_time_budget(int move_num, float time_left);
 
 
 node_t *trans_table;
+opening_t *opening_book;
+
+int on_opening_book = 1;
 
 
 void search_init() {
     init_hash();
     trans_table = init_trans_table();
+    opening_book = init_opening_book();
 }
 
 void search_free() {
     free_trans_table(trans_table);
+    free_opening_book(opening_book);
 }
 
 
@@ -60,9 +66,19 @@ int search(board_t *board, int c, int move_num, float time_left) {
         fprintf(stderr, "Running end-game solver.\n");
         result = endgame_search(board, c, &n_nodes);
     } else {
-        fprintf(stderr, "Running alphabeta search with %.2f seconds.\n",
-                time_budget);
-        result = iter_ab_search(board, c, 1, 60 - move_num, time_budget, &n_nodes);
+        result = -1;
+
+        if (on_opening_book) {
+            result = search_book(opening_book, board);
+            fprintf(stderr, "Opening book result: %d\n", result);
+        }
+
+        if (result == -1) {
+            on_opening_book = 0;
+            fprintf(stderr, "Running alphabeta search with %.2f seconds.\n",
+                    time_budget);
+            result = iter_ab_search(board, c, 1, 60 - move_num, time_budget, &n_nodes);
+        }
     }
 
     end = clock();
@@ -271,7 +287,18 @@ float get_time_budget(int move_num, float time_left) {
     moves_left = (60 - ENDGAME_MOVES - move_num) / 2 + 1;
 
     avg_move_time = time_left / (float)moves_left;
-    result = avg_move_time * EARLY_MOVE_BIAS;
+    
+    /*
+     * If there are a number of moves left, bias toward early moves. This is
+     * mostly offset by searches ending earlier than the time budgeted. Also we
+     * really don't want to do this right near endgame so as not to cut into
+     * endgame solver time.
+     */
+    if (moves_left > 2) {
+        result = avg_move_time * EARLY_MOVE_BIAS;
+    } else {
+        result = avg_move_time;
+    }
 
     /* Minimum time in case we go over time and time_left is too small. */
     if (result < MIN_SEARCH_TIME) return MIN_SEARCH_TIME;

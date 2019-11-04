@@ -28,6 +28,8 @@ int is_equal(board_t key1, board_t key2) {
 node_t *init_trans_table() {
     int ii;
 
+    fprintf(stderr, "Initializing trans table with %d slots.\n", NSLOTS);
+
     node_t *tt = (node_t *)malloc(NSLOTS * sizeof(node_t));
 
     for (ii = 0; ii < NSLOTS; ++ii) {
