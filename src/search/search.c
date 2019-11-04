@@ -10,17 +10,20 @@
 #include "../eval/table_eval.h"
 #include "../opening/opening.h"
 #include "alphabeta.h"
+#include "bestnode.h"
 #include "move_ordering.h"
 #include "trans_table.h"
 
 
 const int ENDGAME_MOVES = 18;
+const int MAX_SEARCH_DEPTH = 15;
 const float ENDGAME_TIME = 10.;
 const float EARLY_MOVE_BIAS = 1.3;
 const float MIN_SEARCH_TIME = 0.1;
 
 
 int iter_ab_search(board_t *board, int c, int step, int max_depth, float max_time, long *n);
+int iter_bns(board_t *board, int c, int step, int max_depth, float max_time, long *n);
 move_score_t ab_search(board_t *board, int c, int depth, long *n);
 
 int endgame_search(board_t *board, int c, long *n);
@@ -77,7 +80,8 @@ int search(board_t *board, int c, int move_num, float time_left) {
             on_opening_book = 0;
             fprintf(stderr, "Running alphabeta search with %.2f seconds.\n",
                     time_budget);
-            result = iter_ab_search(board, c, 1, 60 - move_num, time_budget, &n_nodes);
+            /* result = iter_bns(board, c, 1, 60 - move_num, time_budget, &n_nodes); */
+            result = iter_ab_search(board, c, 1, MAX_SEARCH_DEPTH, time_budget, &n_nodes);
         }
     }
 
@@ -90,6 +94,47 @@ int search(board_t *board, int c, int move_num, float time_left) {
             n_nodes, seconds, nps);
 
     return result;
+}
+
+
+int iter_bns(board_t *board, int c, int step, int max_depth, float max_time, long *n) {
+    int depth;
+    int best_move;
+    float last_time, total_time, time_factor;
+
+    best_move = -1;
+    last_time = 0.;
+    total_time = 0.;
+    time_factor = 4;   /* Initial guess based on previous games. */
+    depth = 1;
+
+    while (total_time + last_time * time_factor <= max_time && depth <= max_depth) {
+        clock_t start, end;
+        float seconds;
+        start = clock();
+
+        best_move = (int) bns(board, c, depth, trans_table, n);
+
+        end = clock();
+        seconds = (float)(end - start) / CLOCKS_PER_SEC;
+
+        /*
+         * Don't use branching factor data from below depth 7, since the timing
+         * isn't accurate to how long deeper searches will take.
+         */
+        if (depth > 7) {
+            time_factor = (time_factor + (seconds / last_time)) / 2;
+        }
+
+        last_time = seconds;
+
+        fprintf(stderr, "Depth %2d best move %2d (time %.2e)\n",
+                depth, best_move, seconds);
+
+        depth++;
+    }
+
+    return best_move;
 }
 
 

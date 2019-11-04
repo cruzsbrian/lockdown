@@ -73,6 +73,10 @@ int8_t search_book(opening_t *ob, board_t *board) {
 
     fprintf(stderr, "Searching for %lx %lx\n", target_taken, target_black);
 
+    if (book_size == 0) {
+        return -1;
+    }
+
     while (max >= min) {
         size_t mid = (max + min) / 2;
 
