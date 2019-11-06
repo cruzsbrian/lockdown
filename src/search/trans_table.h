@@ -4,7 +4,7 @@
 #include <stdint.h>
 #include "../board/board.h"
 
-#define NSLOTS 0x1000000    /* 24 bit hashes */
+#define NSLOTS 0x100000    /* 20 bit hashes */
 
 #define NODE_EXACT      0
 #define NODE_LOWERBOUND 1

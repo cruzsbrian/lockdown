@@ -78,6 +78,7 @@ int search(board_t *board, int c, int move_num, float time_left) {
 
         if (result == -1) {
             on_opening_book = 0;
+
             fprintf(stderr, "Running alphabeta search with %.2f seconds.\n",
                     time_budget);
             /* result = iter_bns(board, c, 1, 60 - move_num, time_budget, &n_nodes); */
