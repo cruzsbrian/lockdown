@@ -4,12 +4,12 @@
 #include "../board/board.h"
 
 
-int16_t piece_score(uint64_t pieces, const int16_t *w);
+static inline int16_t piece_score(uint64_t pieces, const int16_t *w);
 
-int n_corners(uint64_t pieces);
-int x_square(uint64_t pieces);
-int n_edges(uint64_t pieces);
-int n_other(uint64_t pieces);
+static inline int n_corners(uint64_t pieces);
+static inline int x_square(uint64_t pieces);
+static inline int n_edges(uint64_t pieces);
+static inline int n_other(uint64_t pieces);
 
 
 /* Masks for getting sets of pieces. */
@@ -20,10 +20,10 @@ const uint64_t m_other  = 0x003c7e7e7e7e3c00;
 
 /* Weights for different score metrics, broken up into 4 game phases. */
 enum w_index { CORNER, EDGE, MOBILITY, FLIPPABLE, FRONTIER, X_SQUARE };
-const int16_t weights[4][6] = {{ 75, 10, 20, 0, -20, -45 },
-                               { 75, 10, 20, 0, -20, -45 },
-                               { 65, 5, 15, 1, -15, -45 },
-                               { 55, 5, 15, 2, -15, -45 }};
+const int16_t weights[4][6] = {{ 85, 10, 20, 0, -25, -65 },
+                               { 85, 10, 20, 0, -25, -65 },
+                               { 65, 5, 15, 1, -15, -55 },
+                               { 55, 5, 5, 2, -5, -25 }};
 
 
 
@@ -96,7 +96,7 @@ int16_t piece_score(uint64_t pieces, const int16_t *w) {
 /*
  * Count corners in a set of pieces.
  */
-int n_corners(uint64_t pieces) {
+static inline int n_corners(uint64_t pieces) {
     int result = 0;
 
     if (pieces & 0x8000000000000000) result++;
@@ -107,7 +107,7 @@ int n_corners(uint64_t pieces) {
     return result;
 }
 
-int x_square(uint64_t pieces) {
+static inline int x_square(uint64_t pieces) {
     int result = 0;
 
     if (pieces & 0x0040000000000000 && !(pieces & 0x8000000000000000)) result++;
@@ -121,14 +121,14 @@ int x_square(uint64_t pieces) {
 /* 
  * Count non-corner edges in a set of pieces.
  */
-int n_edges(uint64_t pieces) {
+static inline int n_edges(uint64_t pieces) {
     return popcount(m_edge & pieces);
 }
 
 /* 
  * Count non-edges, non-corners in a set of pieces.
  */
-int n_other(uint64_t pieces) {
+static inline int n_other(uint64_t pieces) {
     return popcount(m_other & pieces);
 }
 
