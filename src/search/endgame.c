@@ -11,11 +11,7 @@
 
 
 int endgame_search(board_t *board, int c, node_t *tt, long *n) {
-    /* print_board(board); */
-    /* fprintf(stderr, "%lx\n", board->b); */
-    /* fprintf(stderr, "%lx\n", board->w); */
-
-    move_score_t result = ab_ff(board, c, -INT16_MAX, INT16_MAX, 0, 60, tt, n);
+    move_score_t result = ab_ff(board, c, -1, 1, 0, 60, tt, n);
     fprintf(stderr, "endgame move %d score %d\n", result.pos, result.score);
 
     return (int)result.pos;
