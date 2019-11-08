@@ -66,7 +66,7 @@ void get_scored_moves(move_score_t **move_arr, size_t *n, board_t *board, int c,
                 score = -tt_entry.score;
             }
         } else {
-            score = -alphabeta(board, !c, -INT16_MAX, INT16_MAX, 0, depth, tt, n_nodes, 0).score;
+            score = -ab(board, !c, -INT16_MAX, INT16_MAX, 0, depth, tt, n_nodes, 0).score;
         }
         (*move_arr)[ii].score = score;
 

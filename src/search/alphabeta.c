@@ -16,8 +16,8 @@
  * and whether the game finished. Parameter n is used to track total number of
  * nodes visited.
  */
-move_score_t alphabeta(board_t *board, int c, int16_t alpha, int16_t beta,
-                       int depth, int max_depth, node_t *tt, long *n, int use_tt) {
+move_score_t ab(board_t *board, int c, int16_t alpha, int16_t beta,
+                   int depth, int max_depth, node_t *tt, long *n, int use_tt) {
     board_t old;
     uint64_t moves;
     int8_t move;
@@ -48,7 +48,7 @@ move_score_t alphabeta(board_t *board, int c, int16_t alpha, int16_t beta,
 
     /* If no moves available, pass and continue down. */
     if (moves == 0L) {
-        result = alphabeta(board, !c, -beta, -alpha, depth + 1, max_depth, tt, n, use_tt);
+        result = ab(board, !c, -beta, -alpha, depth + 1, max_depth, tt, n, use_tt);
         score = -result.score;
         if (score >= beta) {
             best_move.score = beta;
@@ -65,20 +65,15 @@ move_score_t alphabeta(board_t *board, int c, int16_t alpha, int16_t beta,
         move = __builtin_ctzll(moves);
         moves &= moves - 1;
 
-        /* Store old board for undo. */
         old = *board;
-
-        /* Make move and get its score. */
         do_move(board, move, c);
-        result = alphabeta(board, !c, -beta, -alpha, depth + 1, max_depth, tt, n, use_tt);
+        result = ab(board, !c, -beta, -alpha, depth + 1, max_depth, tt, n, use_tt);
         score = -result.score;
+        *board = old;
 
         if (depth == 1 && use_tt) {
             set_score(tt, *board, !c, result.score, max_depth - depth, NODE_EXACT);
         }
-
-        /* Undo move. */
-        *board = old;
 
         /*
          * If score is above beta, opponent won't allow this board state to be

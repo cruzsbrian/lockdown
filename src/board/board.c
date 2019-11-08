@@ -383,16 +383,15 @@ void print_board(board_t *board) {
             w = (board->w >> pos) & 1L;
 
             if (w) {
-                printf("W ");
+                fprintf(stderr, "W ");
             } else if (b) {
-                printf("B ");
+                fprintf(stderr, "B ");
             } else {
-                printf("_ ");
+                fprintf(stderr, "_ ");
             }
         }
-        printf("\n");
+        fprintf(stderr, "\n");
     }
-    printf("\n");
 }
 
 void print_bits(uint64_t x) {

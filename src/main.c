@@ -43,7 +43,7 @@ int main(int argc, char *argv[]) {
     /* Game loop. */
     while (read_move(&opp_move, &ms_left)) {
         if (ms_left == -1) {
-            ms_left = 240000 - (clock() - start) / (CLOCKS_PER_SEC / 1000);
+            ms_left = 60000 - (clock() - start) / (CLOCKS_PER_SEC / 1000);
         }
 
         /* Print blank lines before/after our debug messages. */

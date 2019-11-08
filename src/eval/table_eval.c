@@ -20,8 +20,8 @@ const uint64_t m_other  = 0x003c7e7e7e7e3c00;
 
 /* Weights for different score metrics, broken up into 4 game phases. */
 enum w_index { CORNER, EDGE, MOBILITY, FLIPPABLE, FRONTIER, X_SQUARE };
-const int16_t weights[4][6] = {{ 85, 10, 20, 0, -25, -65 },
-                               { 85, 10, 20, 0, -25, -65 },
+const int16_t weights[4][6] = {{ 95, 10, 20, 0, -25, -65 },
+                               { 95, 10, 20, 0, -25, -65 },
                                { 65, 5, 15, 1, -15, -55 },
                                { 55, 5, 5, 2, -5, -25 }};
 

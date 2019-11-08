@@ -11,11 +11,12 @@
 #include "../opening/opening.h"
 #include "alphabeta.h"
 #include "bestnode.h"
+#include "endgame.h"
 #include "move_ordering.h"
 #include "trans_table.h"
 
 
-const int ENDGAME_MOVES = 18;
+const int ENDGAME_MOVES = 20;
 const int MAX_SEARCH_DEPTH = 15;
 const float ENDGAME_TIME = 10.;
 const float EARLY_MOVE_BIAS = 1.3;
@@ -25,8 +26,6 @@ const float MIN_SEARCH_TIME = 0.1;
 int iter_ab_search(board_t *board, int c, int step, int max_depth, float max_time, long *n);
 int iter_bns(board_t *board, int c, int step, int max_depth, float max_time, long *n);
 move_score_t ab_search(board_t *board, int c, int depth, long *n);
-
-int endgame_search(board_t *board, int c, long *n);
 
 float get_time_budget(int move_num, float time_left);
 
@@ -67,7 +66,7 @@ int search(board_t *board, int c, int move_num, float time_left) {
 
     if (move_num >= 60 - ENDGAME_MOVES) {
         fprintf(stderr, "Running end-game solver.\n");
-        result = endgame_search(board, c, &n_nodes);
+        result = endgame_search(board, c, trans_table, &n_nodes);
     } else {
         result = -1;
 
@@ -226,7 +225,7 @@ move_score_t ab_search(board_t *board, int c, int depth, long *n) {
          */
         old = *board;
         do_move(board, move, c);
-        result = alphabeta(board, !c, -INT16_MAX, -best_move.score, 0, depth, trans_table, n, 1);
+        result = ab(board, !c, -INT16_MAX, -best_move.score, 0, depth, trans_table, n, 1);
         *board = old;
 
         /* Score from alphabeta will be for the opponent. */
@@ -249,61 +248,6 @@ move_score_t ab_search(board_t *board, int c, int depth, long *n) {
     return best_move;
 }
 
-
-/**
- * Endgame search:
- * Runs alphabeta search on each move, but with a window of [-1, 1], restricting
- * results to win-loss-draw.
- */
-int endgame_search(board_t *board, int c, long *n) {
-    board_t old;
-    move_score_t *moves;
-    size_t n_moves;
-    int16_t best_score, score;
-    int8_t move;
-    move_score_t result;
-    int ii;
-
-    /* Get available moves, sorted by eval score. */
-    get_scored_moves(&moves, &n_moves, board, c, 5, trans_table, n);
-
-    best_score = -1;
-
-    /* If there are no available moves, pass. */
-    if (n_moves == 0) {
-        return -1;
-    }
-
-    for (ii = 0; ii < n_moves; ++ii) {
-        move = moves[ii].pos;
-
-        fprintf(stderr, "Scanning move %2d ... ", move);
-
-        /*
-         * Store old board, apply the move, evaluate with alphabeta, then revert
-         * to the stored board.
-         */
-        old = *board;
-        do_move(board, move, c);
-        result = alphabeta(board, !c, -1, -best_score, 0, 60, trans_table, n, 0);
-        *board = old;
-
-        score = -result.score;
-
-        /* Print for win/draw/loss. If a win, immediately return. */
-        if (score > 0) {
-            fprintf(stderr, "win\n");
-            return move;
-        } else if (score == 0) {
-            fprintf(stderr, "draw\n");
-            best_score = score;
-        } else {
-            fprintf(stderr, "loss\n");
-        }
-    }
-
-    return moves[0].pos;
-}
 
 
 /**
