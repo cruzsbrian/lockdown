@@ -1,6 +1,7 @@
 #include "endgame.h"
 
 #include <stdio.h>
+#include <stdlib.h>
 #include "../eval/table_eval.h"
 #include "alphabeta.h"
 
@@ -12,7 +13,7 @@
 
 int endgame_search(board_t *board, int c, node_t *tt, long *n) {
     move_score_t result = ab_ff(board, c, -1, 1, 0, 60, tt, n);
-    fprintf(stderr, "endgame move %d score %d\n", result.pos, result.score);
+    fprintf(stderr, "endgame move %s score %d\n", move_notation(result.pos), result.score);
 
     return (int)result.pos;
 }

@@ -16,10 +16,10 @@
 #include "trans_table.h"
 
 
-const int ENDGAME_MOVES = 22;
+const int ENDGAME_MOVES = 20;
 const int MAX_SEARCH_DEPTH = 13;
-const float ENDGAME_TIME = 5.;
-const float EARLY_MOVE_BIAS = 1.3;
+const float ENDGAME_TIME = 10.;
+const float EARLY_MOVE_BIAS = 1.2;
 const float MIN_SEARCH_TIME = 0.1;
 
 
@@ -70,7 +70,8 @@ int search(board_t *board, int c, int move_num, float time_left) {
 
         if (on_opening_book) {
             result = search_book(opening_book, board);
-            fprintf(stderr, "Opening book result: %d\n", result);
+
+            fprintf(stderr, "Opening book result: %s\n", move_notation(result));
         }
 
         if (result == -1) {
@@ -107,19 +108,27 @@ int iter_ab_search(board_t *board, int c, int step, int max_depth, float max_tim
     int depth;
     move_score_t best_move;
     float last_time, total_time, time_factor;
+    float real_score;
 
     best_move.pos = -1;
     last_time = 0.;
     total_time = 0.;
-    time_factor = 6;   /* Initial guess based on previous games. */
+    time_factor = 7;   /* Initial guess based on previous games. */
     depth = 1;
 
     while (total_time + last_time * time_factor <= max_time && depth <= max_depth) {
         clock_t start, end;
         float seconds;
+
         start = clock();
 
         best_move = ab_ordered(board, c, -INT16_MAX, INT16_MAX, 0, depth, trans_table, n);
+
+        /*
+         * Eval weights are multiplied by 50 to be represented as ints. This
+         * should give expected score for perfect play.
+         */
+        real_score = (float)best_move.score / 50;
 
         end = clock();
         seconds = (float)(end - start) / CLOCKS_PER_SEC;
@@ -134,8 +143,8 @@ int iter_ab_search(board_t *board, int c, int step, int max_depth, float max_tim
 
         last_time = seconds;
 
-        fprintf(stderr, "Depth %2d best move %2d (score %3d, time %.2e)\n",
-                depth, best_move.pos, best_move.score, seconds);
+        fprintf(stderr, "Depth %2d best move %s (score % 5.2f, time %.2e)\n",
+                depth, move_notation(best_move.pos), real_score, seconds);
 
         depth++;
     }
@@ -186,6 +195,22 @@ float get_time_budget(int move_num, float time_left) {
 
     /* Minimum time in case we go over time and time_left is too small. */
     if (result < MIN_SEARCH_TIME) return MIN_SEARCH_TIME;
+
+    return result;
+}
+
+
+char *move_notation(int move) {
+    char row, col;
+    char *result = (char *)malloc(2 * sizeof(char));
+
+    if (move == -1) {
+        result = "-1";
+    } else {
+        row = move / 8 + 1;
+        col = 'a' + move % 8;
+        sprintf(result, "%c%d", col, row);
+    }
 
     return result;
 }
