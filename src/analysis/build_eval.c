@@ -6,6 +6,7 @@
 #include "../board/board.h"
 #include "../search/search.h"
 #include "../search/endgame.h"
+#include "../eval/table_eval.h"
 
 
 #define PROGRESS_STEPS 20
@@ -100,13 +101,36 @@ void random_play(board_t *board, int c, int total_moves) {
 
 
 void record_game(board_t *board, int c, int16_t score) {
+    uint64_t own, opp, own_moves, opp_moves, own_flip, opp_flip;
+
+    if (c == BLACK) {
+        own = board->b;
+        opp = board->w;
+    } else {
+        own = board->w;
+        opp = board->b;
+    }
+
+    get_moves_flips(&own_moves, &own_flip, board, c);
+    get_moves_flips(&opp_moves, &opp_flip, board, !c);
+
     int move_num = popcount_board(board) - 4;
+
     printf("%016lx %016lx %d %d %d\n",
             board->b,
             board->w,
             move_num,
             c,
             score);
+
+    printf("%d %d %d %d %d %d %d\n",
+            n_corners(own) - n_corners(opp),
+            n_edges(own) - n_edges(opp),
+            popcount(own_moves) - popcount(opp_moves),
+            popcount(own_flip) - popcount(opp_flip),
+            get_frontier(board, c) - get_frontier(board, !c),
+            x_square(own) - x_square(opp),
+            c_square(own) - c_square(opp));
 }
 
 
