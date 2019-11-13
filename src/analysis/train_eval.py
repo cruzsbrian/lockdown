@@ -46,7 +46,7 @@ def extract(board, pattern):
         w = w << 1
         if board[0][index] != 0: b += 1
         if board[1][index] != 0: w += 1
-    return (b << len(pattern)) + w
+    return (b, w)
 
 def extract_transformations(board, pattern):
     result = []
@@ -70,7 +70,7 @@ def extract_all(board, p_list):
     for ii in range(len(p_list)):
         start = sum(n_instances[:ii])
         for x in extract_transformations(board, p_list[ii]):
-            result.append(start + x)
+            result.append(x)
 
     return result
 
@@ -91,9 +91,9 @@ patterns = {
 n_instances = [2**(2 * len(x)) for x in patterns.values()]
 print(sum(n_instances))
 
-n_trials = 200
+n_trials = 12000
 
-A = np.zeros((n_trials, sum(n_instances)))
+A = np.zeros((n_trials, sum(n_instances)), dtype=np.int8)
 b = np.empty(n_trials)
 
 with open('data.txt', 'r') as f:
@@ -104,9 +104,4 @@ with open('data.txt', 'r') as f:
 
         matches = extract_all(board, [p for p in patterns.values()])
 
-        for m in matches:
-            A[ii][m] += 1
-
         b[ii] = int(line[4])
-
-Ainv = np.linalg.pinv(A)

@@ -14,7 +14,7 @@
 void init_board(board_t *board);
 void random_play(board_t *board, int c, int total_moves);
 
-void record_game(board_t *board, int c, int16_t score, long n_nodes);
+void record_game(board_t *board, int c, int16_t score);
 
 int sign(int16_t n);
 
@@ -25,7 +25,7 @@ int sign(int16_t n);
  * will be based on).
  */
 int main(int argc, char *argv[]) {
-    int n_trials, depth;
+    int n_trials, start_depth, search_depth;
 
     board_t *board;
     int ii, color;
@@ -34,27 +34,28 @@ int main(int argc, char *argv[]) {
 
     int progress = 0;
 
-    if (argc != 3) {
-        fprintf(stderr, "Usage: build_eval [n_trials] [search_depth]\n");
+    if (argc != 4) {
+        fprintf(stderr, "Usage: build_eval [n_trials] [start_depth] [search_depth]\n");
         return 1;
     }
 
     n_trials = atoi(argv[1]);
-    depth = atoi(argv[2]);
+    start_depth = atoi(argv[2]);
+    search_depth = atoi(argv[3]);
 
     srand(time(NULL));
 
     board = create_board();
-    color = depth % 2;
+    color = start_depth % 2;
 
     for (ii = 0; ii < n_trials; ++ii) {
         init_board(board);
-        random_play(board, BLACK, 60 - depth);
+        random_play(board, BLACK, start_depth);
 
         n_nodes = 0L;
-        endgame_result = ab_ff(board, color, -1, 1, 0, 60, NULL, &n_nodes);
+        endgame_result = ab_ff(board, color, -INT16_MAX, INT16_MAX, 0, search_depth, NULL, &n_nodes);
 
-        record_game(board, color, endgame_result.score, n_nodes);
+        record_game(board, color, endgame_result.score);
 
         if (ii * PROGRESS_STEPS > progress * n_trials) {
             progress++;
@@ -98,15 +99,14 @@ void random_play(board_t *board, int c, int total_moves) {
 }
 
 
-void record_game(board_t *board, int c, int16_t score, long n_nodes) {
+void record_game(board_t *board, int c, int16_t score) {
     int move_num = popcount_board(board) - 4;
-    printf("%016lx %016lx %d %d %d %ld\n",
+    printf("%016lx %016lx %d %d %d\n",
             board->b,
             board->w,
             move_num,
             c,
-            score,
-            n_nodes);
+            score);
 }
 
 
