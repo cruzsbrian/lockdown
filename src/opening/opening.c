@@ -71,7 +71,7 @@ int8_t search_book(opening_t *ob, board_t *board) {
     uint64_t target_taken = board->b | board->w;
     uint64_t target_black = board->b;
 
-    fprintf(stderr, "Searching for %lx %lx\n", target_taken, target_black);
+    fprintf(stderr, "Searching for %016lx %016lx\n", target_taken, target_black);
 
     if (book_size == 0) {
         return -1;

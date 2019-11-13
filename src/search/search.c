@@ -16,16 +16,14 @@
 #include "trans_table.h"
 
 
-const int ENDGAME_MOVES = 20;
-const int MAX_SEARCH_DEPTH = 15;
-const float ENDGAME_TIME = 10.;
+const int ENDGAME_MOVES = 22;
+const int MAX_SEARCH_DEPTH = 13;
+const float ENDGAME_TIME = 5.;
 const float EARLY_MOVE_BIAS = 1.3;
 const float MIN_SEARCH_TIME = 0.1;
 
 
 int iter_ab_search(board_t *board, int c, int step, int max_depth, float max_time, long *n);
-int iter_bns(board_t *board, int c, int step, int max_depth, float max_time, long *n);
-move_score_t ab_search(board_t *board, int c, int depth, long *n);
 
 float get_time_budget(int move_num, float time_left);
 
@@ -97,47 +95,6 @@ int search(board_t *board, int c, int move_num, float time_left) {
 }
 
 
-int iter_bns(board_t *board, int c, int step, int max_depth, float max_time, long *n) {
-    int depth;
-    int best_move;
-    float last_time, total_time, time_factor;
-
-    best_move = -1;
-    last_time = 0.;
-    total_time = 0.;
-    time_factor = 4;   /* Initial guess based on previous games. */
-    depth = 1;
-
-    while (total_time + last_time * time_factor <= max_time && depth <= max_depth) {
-        clock_t start, end;
-        float seconds;
-        start = clock();
-
-        best_move = (int) bns(board, c, depth, trans_table, n);
-
-        end = clock();
-        seconds = (float)(end - start) / CLOCKS_PER_SEC;
-
-        /*
-         * Don't use branching factor data from below depth 7, since the timing
-         * isn't accurate to how long deeper searches will take.
-         */
-        if (depth > 7) {
-            time_factor = (time_factor + (seconds / last_time)) / 2;
-        }
-
-        last_time = seconds;
-
-        fprintf(stderr, "Depth %2d best move %2d (time %.2e)\n",
-                depth, best_move, seconds);
-
-        depth++;
-    }
-
-    return best_move;
-}
-
-
 /**
  * Iterative deepening alphabeta search:
  * Repeatedly calls ab_search with greater depth each time, until the next
@@ -154,7 +111,7 @@ int iter_ab_search(board_t *board, int c, int step, int max_depth, float max_tim
     best_move.pos = -1;
     last_time = 0.;
     total_time = 0.;
-    time_factor = 4;   /* Initial guess based on previous games. */
+    time_factor = 6;   /* Initial guess based on previous games. */
     depth = 1;
 
     while (total_time + last_time * time_factor <= max_time && depth <= max_depth) {
@@ -162,7 +119,7 @@ int iter_ab_search(board_t *board, int c, int step, int max_depth, float max_tim
         float seconds;
         start = clock();
 
-        best_move = ab_search(board, c, depth, n);
+        best_move = ab_ordered(board, c, -INT16_MAX, INT16_MAX, 0, depth, trans_table, n);
 
         end = clock();
         seconds = (float)(end - start) / CLOCKS_PER_SEC;
@@ -185,69 +142,6 @@ int iter_ab_search(board_t *board, int c, int step, int max_depth, float max_tim
 
     return best_move.pos;
 }
-
-
-/*
- * Alphabeta search:
- * Orders moves and then runs an alphabeta search to a given depth on each one
- * to determine it's score. Returns the best move along with it's score.
- */
-move_score_t ab_search(board_t *board, int c, int depth, long *n) {
-    board_t old;
-    move_score_t *moves;
-    size_t n_moves;
-
-    int16_t score;
-    int8_t move;
-    move_score_t best_move, result;
-
-    int ii;
-
-    /* Get available moves, sorted by eval score. */
-    get_scored_moves(&moves, &n_moves, board, c, 5, trans_table, n);
-
-    /* Start with minimum score */
-    best_move.score = -INT16_MAX;
-    best_move.pos = -1;
-
-    /* If there are no available moves, return a pass. */
-    if (n_moves == 0) {
-        return best_move;
-    }
-
-    /* Search each move. */
-    for (ii = 0; ii < n_moves; ++ii) {
-        move = moves[ii].pos;
-
-        /*
-         * Store old board, apply the move, evaluate with alphabeta, then revert
-         * to the stored board.
-         */
-        old = *board;
-        do_move(board, move, c);
-        result = ab(board, !c, -INT16_MAX, -best_move.score, 0, depth, trans_table, n, 1);
-        *board = old;
-
-        /* Score from alphabeta will be for the opponent. */
-        score = -result.score;
-
-        /*
-         * If this move is the best one found yet, print score and update
-         * best_move. Otherwise just print newline and go to next.
-         */
-        if (score > best_move.score) {
-            best_move.pos = move;
-            best_move.score = score;
-            best_move.end = result.end;
-        }
-    }
-
-    /* Free the array of moves allocated by get_scored_moves(). */
-    free(moves);
-
-    return best_move;
-}
-
 
 
 /**
