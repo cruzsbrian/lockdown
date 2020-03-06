@@ -116,7 +116,7 @@ int iter_ab_search(board_t *board, int c, int step, int max_depth, float max_tim
     time_factor = 7;   /* Initial guess based on previous games. */
     depth = 1;
 
-    while (total_time + last_time * time_factor <= max_time && depth <= max_depth) {
+    while (total_time + last_time * 5 <= max_time && depth <= max_depth) {
         clock_t start, end;
         float seconds;
 
