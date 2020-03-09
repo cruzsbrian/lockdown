@@ -64,7 +64,7 @@ int main(int argc, char *argv[]) {
         }
     }
 
-    fprintf(stderr, "\n");
+    /* fprintf(stderr, "\n"); */
 
     return 0;
 }
@@ -123,14 +123,15 @@ void record_game(board_t *board, int c, int16_t score) {
             c,
             score);
 
-    printf("%d %d %d %d %d %d %d\n",
+    printf("%d %d %d %d %d %d %d %d\n",
             n_corners(own) - n_corners(opp),
             n_edges(own) - n_edges(opp),
             popcount(own_moves) - popcount(opp_moves),
             popcount(own_flip) - popcount(opp_flip),
             get_frontier(board, c) - get_frontier(board, !c),
             x_square(own) - x_square(opp),
-            c_square(own) - c_square(opp));
+            c_square(own) - c_square(opp),
+            get_stable(board, c) - get_stable(board, !c));
 }
 
 

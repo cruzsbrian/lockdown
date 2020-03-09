@@ -90,6 +90,10 @@ const uint64_t notHFile = 0x7f7f7f7f7f7f7f7f;
  * something in the pro bitmap. For east, west, and diagonals, we exclude the
  * first file in that shift direction to avoid wrap-around.
  *
+ * Shift algorithms:
+ * Shifts the pieces one step in the specified direction, making sure pieces
+ * don't wrap around.
+ *
  * The result takes each piece in gen, and draws a ray from it in the specified
  * direction as far as pieces in pro go in that direction.
  */
@@ -102,6 +106,10 @@ uint64_t soutOccl(uint64_t gen, uint64_t pro) {
     return gen;
 }
 
+uint64_t soutOne(uint64_t gen) {
+    return gen >> 8;
+}
+
 uint64_t nortOccl(uint64_t gen, uint64_t pro) {
     gen |= pro & (gen << 8);
     pro &=       (pro << 8);
@@ -109,6 +117,10 @@ uint64_t nortOccl(uint64_t gen, uint64_t pro) {
     pro &=       (pro << 16);
     gen |= pro & (gen << 32);
     return gen;
+}
+
+uint64_t nortOne(uint64_t gen) {
+    return gen << 8;
 }
 
 uint64_t eastOccl(uint64_t gen, uint64_t pro) {
@@ -121,6 +133,10 @@ uint64_t eastOccl(uint64_t gen, uint64_t pro) {
     return gen;
 }
 
+uint64_t eastOne(uint64_t gen) {
+    return (gen & notAFile) << 1;
+}
+
 uint64_t westOccl(uint64_t gen, uint64_t pro) {
     pro &= notHFile;
     gen |= pro & (gen >> 1);
@@ -129,6 +145,10 @@ uint64_t westOccl(uint64_t gen, uint64_t pro) {
     pro &=       (pro >> 2);
     gen |= pro & (gen >> 4);
     return gen;
+}
+
+uint64_t westOne(uint64_t gen) {
+    return (gen & notHFile) >> 1;
 }
 
 uint64_t noEaOccl(uint64_t gen, uint64_t pro) {
@@ -141,6 +161,10 @@ uint64_t noEaOccl(uint64_t gen, uint64_t pro) {
     return gen;
 }
 
+uint64_t noEaOne(uint64_t gen) {
+    return (gen & notAFile) << 9;
+}
+
 uint64_t soEaOccl(uint64_t gen, uint64_t pro) {
     pro &= notAFile;
     gen |= pro & (gen >> 7);
@@ -149,6 +173,10 @@ uint64_t soEaOccl(uint64_t gen, uint64_t pro) {
     pro &=       (pro >> 14);
     gen |= pro & (gen >> 28);
     return gen;
+}
+
+uint64_t soEaOne(uint64_t gen) {
+    return (gen & notAFile) >> 7;
 }
 
 uint64_t noWeOccl(uint64_t gen, uint64_t pro) {
@@ -161,6 +189,10 @@ uint64_t noWeOccl(uint64_t gen, uint64_t pro) {
     return gen;
 }
 
+uint64_t noWeOne(uint64_t gen) {
+    return (gen & notHFile) << 7;
+}
+
 uint64_t soWeOccl(uint64_t gen, uint64_t pro) {
     pro &= notHFile;
     gen |= pro & (gen >> 9);
@@ -169,6 +201,10 @@ uint64_t soWeOccl(uint64_t gen, uint64_t pro) {
     pro &=       (pro >> 18);
     gen |= pro & (gen >> 36);
     return gen;
+}
+
+uint64_t soWeOne(uint64_t gen) {
+    return (gen & notHFile) >> 9;
 }
 
 
@@ -309,6 +345,52 @@ int get_frontier(board_t *board, int c) {
     frontier |= (own >> 9) & notHFile & empty;
 
     return popcount(frontier);
+}
+
+int get_stable(board_t *board, int c) {
+    const uint64_t top    = 0xff00000000000000;
+    const uint64_t bottom = 0x00000000000000ff;
+    const uint64_t left   = 0x0101010101010101;
+    const uint64_t right  = 0x8080808080808080;
+
+    uint64_t own, opp, pcs, vert, horiz, diag1, diag2, stable_own, stable_opp;
+
+    if (c == BLACK) {
+        own = board->b;
+        opp = board->w;
+    } else {
+        own = board->w;
+        opp = board->b;
+    }
+
+    pcs = board->b | board->w;
+
+    vert  = nortOccl(bottom & pcs, pcs) & soutOccl(top & pcs, pcs);
+    horiz = eastOccl(left & pcs, pcs) & westOccl(right & pcs, pcs);
+    diag1 = noEaOccl((bottom | left) & pcs, pcs) & soWeOccl((top | right) & pcs, pcs);
+    diag2 = noWeOccl((bottom | right) & pcs, pcs) & soEaOccl((top | left) & pcs, pcs);
+
+    stable_own = (0x8100000000000081 | (vert & horiz & diag1 & diag2)) & own;
+    stable_opp = (0x8100000000000081 | (vert & horiz & diag1 & diag2)) & opp;
+
+    /* Expand the stable areas. */
+    for (int ii = 0; ii < 8; ++ii) {
+        stable_own |= own & (
+            (nortOne(stable_own) | soutOne(stable_own) | vert) &
+            (eastOne(stable_own) | westOne(stable_own) | horiz) &
+            (noEaOne(stable_own) | soWeOne(stable_own) | diag1) &
+            (noWeOne(stable_own) | soEaOne(stable_own) | diag2)
+        );
+        stable_opp |= opp & (
+            (nortOne(stable_opp) | soutOne(stable_opp) | vert) &
+            (eastOne(stable_opp) | westOne(stable_opp) | horiz) &
+            (noEaOne(stable_opp) | soWeOne(stable_opp) | diag1) &
+            (noWeOne(stable_opp) | soEaOne(stable_opp) | diag2)
+        );
+;
+    }
+
+    return popcount(stable_own) - popcount(stable_opp);
 }
 
 
