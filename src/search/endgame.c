@@ -10,15 +10,6 @@
 #define MAX_MOVES 32
 
 
-
-int endgame_search(board_t *board, int c, node_t *tt, long *n) {
-    move_score_t result = ab_ff(board, c, -1, 1, 0, 60, tt, n);
-    fprintf(stderr, "endgame move %s score %d\n", move_notation(result.pos), result.score);
-
-    return (int)result.pos;
-}
-
-
 move_score_t ab_ff(board_t *board, int c, int16_t alpha, int16_t beta,
                     int depth, int max_depth, node_t *tt, long *n) {
     uint64_t move_mask;

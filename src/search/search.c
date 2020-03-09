@@ -16,7 +16,7 @@
 #include "trans_table.h"
 
 
-const int ENDGAME_MOVES = 20;
+const int ENDGAME_MOVES = 18;
 const int MAX_SEARCH_DEPTH = 13;
 const float ENDGAME_TIME = 10.;
 const float EARLY_MOVE_BIAS = 1.2;
@@ -24,6 +24,8 @@ const float MIN_SEARCH_TIME = 0.1;
 
 
 int iter_ab_search(board_t *board, int c, int step, int max_depth, float max_time, long *n);
+
+int endgame_search(board_t *board, int c, node_t *tt, long *n, float time_left, int move_num);
 
 float get_time_budget(int move_num, float time_left);
 
@@ -64,7 +66,7 @@ int search(board_t *board, int c, int move_num, float time_left) {
 
     if (move_num >= 60 - ENDGAME_MOVES) {
         fprintf(stderr, "Running end-game solver.\n");
-        result = endgame_search(board, c, trans_table, &n_nodes);
+        result = endgame_search(board, c, trans_table, &n_nodes, time_left, move_num);
     } else {
         result = -1;
 
@@ -113,7 +115,7 @@ int iter_ab_search(board_t *board, int c, int step, int max_depth, float max_tim
     best_move.pos = -1;
     last_time = 0.;
     total_time = 0.;
-    time_factor = 7;   /* Initial guess based on previous games. */
+    time_factor = 10;   /* Initial guess based on previous games. */
     depth = 1;
 
     while (total_time + last_time * 5 <= max_time && depth <= max_depth) {
@@ -137,19 +139,49 @@ int iter_ab_search(board_t *board, int c, int step, int max_depth, float max_tim
          * Don't use branching factor data from below depth 7, since the timing
          * isn't accurate to how long deeper searches will take.
          */
-        if (depth > 7) {
+        if (depth > 8) {
             time_factor = (time_factor + (seconds / last_time)) / 2;
         }
 
         last_time = seconds;
 
-        fprintf(stderr, "Depth %2d best move %s (score % 5.2f, time %.2e)\n",
+        fprintf(stderr, "Depth %2d best move %s (score %6.2f, time %.2e)\n",
                 depth, move_notation(best_move.pos), real_score, seconds);
 
         depth++;
     }
 
     return best_move.pos;
+}
+
+
+int endgame_search(board_t *board, int c, node_t *tt, long *n, float time_left, int move_num) {
+    clock_t start, end;
+    float seconds, time_budget;
+    int moves_left;
+
+    start = clock();
+
+    move_score_t result = ab_ff(board, c, -INT16_MAX, INT16_MAX, 0, 60, tt, n);
+    fprintf(stderr, "endgame move %s score %d\n", move_notation(result.pos), result.score);
+
+    /* If no winning move was found, fall back to alphabeta. */
+    /* Currently not using because endgame solver is not w-l-d for now. */
+    /* if (result.score < 0) { */
+    /*     end = clock(); */
+    /*     seconds = (float)(end - start) / CLOCKS_PER_SEC; */
+
+    /*     fprintf(stderr, "\nFalling back to alphabeta.\n"); */
+    /*     fprintf(stderr, "%.2f seconds left\n", time_left - seconds); */
+    /*     moves_left = (60 - move_num) / 2 + 1; */
+    /*     time_budget = (time_left - seconds) / (float)moves_left; */
+
+    /*     fprintf(stderr, "Running alphabeta search with %.2f seconds.\n", */
+    /*             time_budget); */
+    /*     return iter_ab_search(board, c, 1, MAX_SEARCH_DEPTH, time_budget, n); */
+    /* } */
+
+    return (int)result.pos;
 }
 
 
