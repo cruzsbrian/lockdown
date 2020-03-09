@@ -387,7 +387,6 @@ int get_stable(board_t *board, int c) {
             (noEaOne(stable_opp) | soWeOne(stable_opp) | diag1) &
             (noWeOne(stable_opp) | soEaOne(stable_opp) | diag2)
         );
-;
     }
 
     return popcount(stable_own) - popcount(stable_opp);

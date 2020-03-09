@@ -5,6 +5,6 @@
 #include "search.h"
 #include "trans_table.h"
 
-int16_t find_score(board_t *board, int c, int depth, node_t *tt, long *n_nodes);
+int16_t find_score(board_t *board, int c, int depth, int move_num, node_t *tt, long *n_nodes);
 
 #endif

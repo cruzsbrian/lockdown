@@ -22,7 +22,7 @@
  * nodes visited.
  */
 move_score_t ab_ordered(board_t *board, int c, int16_t alpha, int16_t beta,
-                    int depth, int max_depth, node_t *tt, long *n) {
+                    int depth, int max_depth, int move_num, node_t *tt, long *n) {
     uint64_t move_mask;
     board_t new_boards[MAX_MOVES];
     int16_t scores[MAX_MOVES];
@@ -35,11 +35,11 @@ move_score_t ab_ordered(board_t *board, int c, int16_t alpha, int16_t beta,
     (*n)++;
 
     if (max_depth - depth < SORT_CUTOFF) {
-        return ab(board, c, alpha, beta, depth, max_depth, tt, n, 0);
+        return ab(board, c, alpha, beta, depth, max_depth, move_num, tt, n, 0);
     }
 
     if (depth == max_depth) {
-        best_move.score = table_eval(board, c);
+        best_move.score = table_eval(board, c, move_num);
         return best_move;
     }
 
@@ -52,7 +52,7 @@ move_score_t ab_ordered(board_t *board, int c, int16_t alpha, int16_t beta,
             /* fprintf(stderr, "score %d\n\n", endgame_eval(board, WHITE)); */
             best_move.end = 1;
         } else { /* Otherwise we just pass. */
-            best_move.score = -ab_ordered(board, !c, -beta, -alpha, depth, max_depth, tt, n).score;
+            best_move.score = -ab_ordered(board, !c, -beta, -alpha, depth, max_depth, move_num, tt, n).score;
         }
 
         best_move.pos = -1;
@@ -72,7 +72,7 @@ move_score_t ab_ordered(board_t *board, int c, int16_t alpha, int16_t beta,
         do_move(board, move, c);
 
         new_boards[n_moves] = *board;
-        scores[n_moves] = find_score(board, c, SORT_CUTOFF - depth, tt, n);
+        scores[n_moves] = find_score(board, c, SORT_CUTOFF - depth, move_num, tt, n);
         moves[n_moves] = move;
 
         *board = old;
@@ -100,7 +100,7 @@ move_score_t ab_ordered(board_t *board, int c, int16_t alpha, int16_t beta,
         /* This will prevent searching this move next time. */
         scores[best_index] = -INT16_MAX;
 
-        score = -ab_ordered(new_boards + best_index, !c, -beta, -alpha, depth + 1, max_depth, tt, n).score;
+        score = -ab_ordered(new_boards + best_index, !c, -beta, -alpha, depth + 1, max_depth, move_num + 1, tt, n).score;
         set_score(tt, *board, !c, -score, max_depth - depth, NODE_EXACT);
 
         if (score >= beta) {
@@ -124,7 +124,7 @@ move_score_t ab_ordered(board_t *board, int c, int16_t alpha, int16_t beta,
 
 
 move_score_t ab(board_t *board, int c, int16_t alpha, int16_t beta,
-                   int depth, int max_depth, node_t *tt, long *n, int use_tt) {
+                   int depth, int max_depth, int move_num, node_t *tt, long *n, int use_tt) {
     board_t old;
     uint64_t moves;
     int8_t move;
@@ -140,7 +140,7 @@ move_score_t ab(board_t *board, int c, int16_t alpha, int16_t beta,
 
     /* If depth reached, evaluate and return. */
     if (depth == max_depth) {
-        best_move.score = table_eval(board, c);
+        best_move.score = table_eval(board, c, move_num);
         return best_move;
     }
 
@@ -155,7 +155,7 @@ move_score_t ab(board_t *board, int c, int16_t alpha, int16_t beta,
 
     /* If no moves available, pass and continue down. */
     if (moves == 0L) {
-        result = ab(board, !c, -beta, -alpha, depth + 1, max_depth, tt, n, use_tt);
+        result = ab(board, !c, -beta, -alpha, depth + 1, max_depth, move_num + 1, tt, n, use_tt);
         score = -result.score;
         if (score >= beta) {
             best_move.score = beta;
@@ -174,7 +174,7 @@ move_score_t ab(board_t *board, int c, int16_t alpha, int16_t beta,
 
         old = *board;
         do_move(board, move, c);
-        result = ab(board, !c, -beta, -alpha, depth + 1, max_depth, tt, n, use_tt);
+        result = ab(board, !c, -beta, -alpha, depth + 1, max_depth, move_num + 1, tt, n, use_tt);
         score = -result.score;
         *board = old;
 

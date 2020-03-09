@@ -16,14 +16,14 @@
 #include "trans_table.h"
 
 
-const int ENDGAME_MOVES = 18;
+const int ENDGAME_MOVES = 16;
 const int MAX_SEARCH_DEPTH = 13;
 const float ENDGAME_TIME = 10.;
 const float EARLY_MOVE_BIAS = 1.2;
 const float MIN_SEARCH_TIME = 0.1;
 
 
-int iter_ab_search(board_t *board, int c, int step, int max_depth, float max_time, long *n);
+int iter_ab_search(board_t *board, int c, int step, int max_depth, float max_time, int move_num, long *n);
 
 int endgame_search(board_t *board, int c, node_t *tt, long *n, float time_left, int move_num);
 
@@ -82,7 +82,7 @@ int search(board_t *board, int c, int move_num, float time_left) {
             fprintf(stderr, "Running alphabeta search with %.2f seconds.\n",
                     time_budget);
             /* result = iter_bns(board, c, 1, 60 - move_num, time_budget, &n_nodes); */
-            result = iter_ab_search(board, c, 1, MAX_SEARCH_DEPTH, time_budget, &n_nodes);
+            result = iter_ab_search(board, c, 1, MAX_SEARCH_DEPTH, time_budget, move_num, &n_nodes);
         }
     }
 
@@ -106,7 +106,7 @@ int search(board_t *board, int c, int move_num, float time_left) {
  * searches. If the time already taken plus the estimated time is more than
  * max_time, exit the loop and return the result from the latest search.
  */
-int iter_ab_search(board_t *board, int c, int step, int max_depth, float max_time, long *n) {
+int iter_ab_search(board_t *board, int c, int step, int max_depth, float max_time, int move_num, long *n) {
     int depth;
     move_score_t best_move;
     float last_time, total_time, time_factor;
@@ -124,7 +124,7 @@ int iter_ab_search(board_t *board, int c, int step, int max_depth, float max_tim
 
         start = clock();
 
-        best_move = ab_ordered(board, c, -INT16_MAX, INT16_MAX, 0, depth, trans_table, n);
+        best_move = ab_ordered(board, c, -INT16_MAX, INT16_MAX, 0, depth, move_num, trans_table, n);
 
         /*
          * Eval weights are multiplied by 50 to be represented as ints. This
@@ -162,7 +162,7 @@ int endgame_search(board_t *board, int c, node_t *tt, long *n, float time_left, 
 
     start = clock();
 
-    move_score_t result = ab_ff(board, c, -INT16_MAX, INT16_MAX, 0, 60, tt, n);
+    move_score_t result = ab_ff(board, c, -INT16_MAX, INT16_MAX, 0, 60, move_num, tt, n);
     fprintf(stderr, "endgame move %s score %d\n", move_notation(result.pos), result.score);
 
     /* If no winning move was found, fall back to alphabeta. */

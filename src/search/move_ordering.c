@@ -10,7 +10,7 @@
 #include "alphabeta.h"
 #include "trans_table.h"
 
-int16_t find_score(board_t *board, int c, int depth, node_t *tt, long *n_nodes) {
+int16_t find_score(board_t *board, int c, int depth, int move_num, node_t *tt, long *n_nodes) {
     node_t tt_entry;
 
     tt_entry = lookup_score(tt, *board);
@@ -22,5 +22,5 @@ int16_t find_score(board_t *board, int c, int depth, node_t *tt, long *n_nodes) 
         }
     }
 
-    return -ab(board, !c, -INT16_MAX, INT16_MAX, 0, depth, tt, n_nodes, 0).score;
+    return -ab(board, !c, -INT16_MAX, INT16_MAX, 0, depth, move_num, tt, n_nodes, 0).score;
 }

@@ -4,7 +4,7 @@
 #include <stdint.h>
 #include "../board/board.h"
 
-int16_t table_eval(board_t *b, int c);
+int16_t table_eval(board_t *b, int c, int move_num);
 int endgame_eval(board_t *b, int c);
 
 int n_corners(uint64_t pieces);

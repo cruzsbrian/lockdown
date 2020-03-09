@@ -50,11 +50,11 @@ const int game_phase[12] = {0, 0, 0, 0, 0, 1, 2, 3, 4, 5, 6, 7};
  * that can be flipped in the next move, frontier pieces, and x-square and
  * c-square pieces.
  */
-int16_t table_eval(board_t *b, int c) {
+int16_t table_eval(board_t *b, int c, int move_num) {
     uint64_t own, opp,
              own_moves, opp_moves,
              own_flip, opp_flip;
-    int move_num, gp;
+    int gp;
 
     int16_t score = 0;
 
@@ -66,7 +66,6 @@ int16_t table_eval(board_t *b, int c) {
         opp = b->b;
     }
 
-    move_num = popcount(own) + popcount(opp) - 5;
     gp = game_phase[move_num / 5];
 
     get_moves_flips(&own_moves, &own_flip, b, c);
@@ -78,7 +77,11 @@ int16_t table_eval(board_t *b, int c) {
     score += (get_frontier(b, c) - get_frontier(b, !c)) * weights[gp][4];
     score += (x_square(own) - x_square(opp)) * weights[gp][5];
     score += (c_square(own) - c_square(opp)) * weights[gp][6];
-    score += get_stable(b, c) * weights[gp][7];
+
+    /* Don't look at stability until there might actually be stable pieces. */
+    if ((own | opp) & (m_corner | m_c_square)) {
+        score += get_stable(b, c) * weights[gp][7];
+    }
 
     return score;
 }

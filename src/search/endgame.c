@@ -11,7 +11,7 @@
 
 
 move_score_t ab_ff(board_t *board, int c, int16_t alpha, int16_t beta,
-                    int depth, int max_depth, node_t *tt, long *n) {
+                    int depth, int max_depth, int move_num, node_t *tt, long *n) {
     uint64_t move_mask;
     board_t new_boards[MAX_MOVES];
     int16_t mobilities[MAX_MOVES];
@@ -24,11 +24,11 @@ move_score_t ab_ff(board_t *board, int c, int16_t alpha, int16_t beta,
     (*n)++;
 
     if (max_depth - depth < SORT_CUTOFF) {
-        return ab(board, c, alpha, beta, depth, max_depth, tt, n, 0);
+        return ab(board, c, alpha, beta, depth, max_depth, move_num, tt, n, 0);
     }
 
     if (depth == max_depth) {
-        best_move.score = table_eval(board, c);
+        best_move.score = table_eval(board, c, move_num);
         return best_move;
     }
 
@@ -41,7 +41,7 @@ move_score_t ab_ff(board_t *board, int c, int16_t alpha, int16_t beta,
             /* fprintf(stderr, "score %d\n\n", endgame_eval(board, WHITE)); */
             best_move.end = 1;
         } else { /* Otherwise we just pass. */
-            best_move.score = -ab_ff(board, !c, -beta, -alpha, depth, max_depth, tt, n).score;
+            best_move.score = -ab_ff(board, !c, -beta, -alpha, depth, max_depth, move_num, tt, n).score;
         }
 
         best_move.pos = -1;
@@ -89,7 +89,7 @@ move_score_t ab_ff(board_t *board, int c, int16_t alpha, int16_t beta,
         /* This will prevent searching this move next time. */
         mobilities[best_index] = INT16_MAX;
 
-        score = -ab_ff(new_boards + best_index, !c, -beta, -alpha, depth + 1, max_depth, tt, n).score;
+        score = -ab_ff(new_boards + best_index, !c, -beta, -alpha, depth + 1, max_depth, move_num + 1, tt, n).score;
 
         if (score >= beta) {
             best_move.score = score;

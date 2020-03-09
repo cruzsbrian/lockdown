@@ -7,6 +7,6 @@
 #include "trans_table.h"
 
 move_score_t ab_ff(board_t *board, int c, int16_t alpha, int16_t beta, int depth,
-                    int max_depth, node_t *tt, long *n);
+                    int max_depth, int move_num, node_t *tt, long *n);
 
 #endif

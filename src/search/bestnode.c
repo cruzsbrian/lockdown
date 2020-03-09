@@ -22,11 +22,11 @@ int8_t bns(board_t *board, int c, int depth, node_t *tt, long *n) {
 
     int ii;
 
-    get_scored_moves(&moves, &n_moves, board, c, 5, tt, n);
+    /* get_scored_moves(&moves, &n_moves, board, c, 5, tt, n); */
     better_count = (int) n_moves;
     best_move = moves[0].pos;
 
-    test_score = -ab(board, c, -INT16_MAX, INT16_MAX, 0, depth / 2, tt, n, 1).score;
+    test_score = -ab(board, c, -INT16_MAX, INT16_MAX, 0, depth / 2, 0, tt, n, 1).score;
 
     alpha = test_score - 100;
     beta = test_score + 100;
@@ -39,7 +39,7 @@ int8_t bns(board_t *board, int c, int depth, node_t *tt, long *n) {
 
             old = *board;
             do_move(board, move, c);
-            score = -ab(board, !c, -beta, -alpha, 0, depth, tt, n, 1).score;
+            score = -ab(board, !c, -beta, -alpha, 0, depth, 0, tt, n, 1).score;
             *board = old;
 
             if (score > test_score) {
